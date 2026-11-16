@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #111111;
+  --color-surface: #171717;
+  --color-card: #242424;
+  --color-border: #303030;
+  --color-primary: #ffffff;
+  --color-secondary: #a0a0a0;
+  --color-accent: #075be8;
+  --color-orange: #e58b35;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #111111;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Hide scrollbars on horizontal carousels while keeping scroll */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth momentum scrolling on iOS */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* SafeTix-style animated blue scan glow on digital tickets */
+.barcode-scan-glow {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(2, 108, 223, 0.15) 25%,
+    rgba(2, 108, 223, 0.55) 50%,
+    rgba(2, 108, 223, 0.15) 75%,
+    transparent 100%
+  );
+  animation: barcode-scan 2.4s ease-in-out infinite;
+}
+
+@keyframes barcode-scan {
+  0% {
+    transform: translateX(-20%);
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(280%);
+    opacity: 0.65;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

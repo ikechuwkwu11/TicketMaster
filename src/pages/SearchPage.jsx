@@ -1,11 +1,12 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
-import { searchEvents } from '../data/events';
+import { useCatalog } from '../context/CatalogContext';
 import SearchBar from '../components/layout/SearchBar';
 
 export default function SearchPage() {
   const [params] = useSearchParams();
   const q = params.get('q') || '';
+  const { searchEvents } = useCatalog();
   const results = searchEvents(q);
 
   return (

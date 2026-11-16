@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Ticket } from 'lucide-react';
 import TicketCard from '../components/cards/TicketCard';
-import { upcomingTickets, pastTickets } from '../data/tickets';
+import { useCatalog } from '../context/CatalogContext';
 
 function UsFlag() {
   return (
@@ -26,6 +26,7 @@ function UsFlag() {
 
 export default function MyTicketsPage() {
   const [tab, setTab] = useState('upcoming');
+  const { upcomingTickets, pastTickets } = useCatalog();
   const tickets = tab === 'upcoming' ? upcomingTickets : pastTickets;
 
   return (

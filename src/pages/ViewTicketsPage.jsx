@@ -6,7 +6,7 @@ import {
   ScanBarcode,
   Ticket,
 } from 'lucide-react';
-import { getTicketBySlug } from '../data/tickets';
+import { useCatalog } from '../context/CatalogContext';
 import SeatTicketBlock from '../components/tickets/SeatTicketBlock';
 import TransferSellBar from '../components/tickets/TransferSellBar';
 import TransferTicketsSheet from '../components/tickets/TransferTicketsSheet';
@@ -14,6 +14,7 @@ import TransferTicketsSheet from '../components/tickets/TransferTicketsSheet';
 export default function ViewTicketsPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { getTicketBySlug } = useCatalog();
   const ticket = getTicketBySlug(slug);
   const [tab, setTab] = useState('tickets');
   const [scrolled, setScrolled] = useState(false);

@@ -1,39 +1,66 @@
 # TicketMaster
 
-Premium dark-themed event ticketing web app (Ticketmaster-inspired), built with React + Tailwind CSS.
+Premium dark-themed event ticketing web app (Ticketmaster-inspired) with a React frontend and Django REST Framework backend.
 
 ## Stack
 
-- **Frontend:** React (Vite)
-- **Styling:** Tailwind CSS v4
-- **Routing:** React Router
-- **Backend-ready:** API client stub for Django REST Framework + PostgreSQL
+- **Frontend:** React (Vite) + Tailwind CSS v4 + React Router
+- **Backend:** Django 5 + Django REST Framework + SimpleJWT
+- **Auth:** JWT for the React admin console (`admin` / `admin123`)
 
-## Getting started
+## Project layout
+
+```
+TicketMaster/
+  src/                 # React app (public site + /admin)
+  backend/             # Django project
+    config/            # settings, urls
+    catalog/           # sections, events, images
+    tickets/           # ticket orders + seats
+    accounts/          # admin JWT login
+```
+
+## Quick start
+
+### 1. Backend API
+
+```bash
+python -m pip install -r backend/requirements.txt
+python backend/manage.py migrate
+python backend/manage.py seed_catalog --reset
+python backend/manage.py runserver 8000
+```
+
+API root: [http://localhost:8000/api/](http://localhost:8000/api/)  
+Django admin: [http://localhost:8000/django-admin/](http://localhost:8000/django-admin/)
+
+### 2. Frontend
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+App: [http://localhost:5173](http://localhost:5173)  
+React admin: [http://localhost:5173/admin/login](http://localhost:5173/admin/login)
 
-## Features
+Set `VITE_API_BASE_URL=http://localhost:8000/api` in `.env` (see `.env.example`).
 
-- Mobile-first homepage matching Ticketmaster-style sections
-- Horizontal card carousels (For You, Last Minute, Popular, Just Announced, Concerts, Sports, Arts, Family, Festivals)
-- Search across events / artists / venues
-- Watchlist (heart toggle, persisted in `localStorage`)
-- Event detail pages, category View All listings
-- Fixed mobile bottom nav + responsive desktop header
+## Main API endpoints
 
-## Django REST preparation
+| Method | Path | Access |
+|--------|------|--------|
+| GET | `/api/bootstrap/` | Public — full catalog payload for the app |
+| GET | `/api/events/`, `/api/events/{slug}/` | Public read |
+| POST/PUT/PATCH/DELETE | `/api/events/...` | Admin JWT |
+| GET | `/api/tickets/catalog/` | Public |
+| POST/PUT/DELETE | `/api/tickets/...` | Admin JWT |
+| GET/POST/DELETE | `/api/images/` | Read public, write admin |
+| GET/PATCH | `/api/sections/{key}/` | Read public, write admin |
+| POST | `/api/auth/admin/login/` | Public — returns JWT |
+| POST | `/api/catalog/reset/` | Admin — reseed sample data |
 
-Set `VITE_API_BASE_URL` (see `.env.example`). The client in `src/api/client.js` expects endpoints like:
+## Admin credentials
 
-- `GET /api/events/`
-- `GET /api/events/:slug/`
-- `GET /api/events/?search=`
-- `GET|POST|DELETE /api/watchlist/`
-
-Sample event shapes in `src/data/events.js` mirror typical DRF serializer fields.
+- Username: `admin`
+- Password: `admin123`

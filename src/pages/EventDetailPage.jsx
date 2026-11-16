@@ -1,17 +1,13 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Heart, MapPin, Calendar, Clock, Ticket } from 'lucide-react';
-import { getEventBySlug } from '../data/events';
-import { getTicketBySlug } from '../data/tickets';
+import { useCatalog } from '../context/CatalogContext';
 import { useWatchlist } from '../context/WatchlistContext';
-
-function getBySlug(slug) {
-  return getEventBySlug(slug) || getTicketBySlug(slug);
-}
 
 export default function EventDetailPage() {
   const { slug } = useParams();
   const [params] = useSearchParams();
-  const event = getBySlug(slug);
+  const { getEventBySlug, getTicketBySlug } = useCatalog();
+  const event = getEventBySlug(slug) || getTicketBySlug(slug);
   const { isWatched, toggle } = useWatchlist();
   const showPresale = params.get('presale') === '1';
 

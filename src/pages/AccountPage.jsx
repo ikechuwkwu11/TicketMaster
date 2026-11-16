@@ -1,4 +1,5 @@
-import { User, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { User, ChevronRight, Shield } from 'lucide-react';
 
 const rows = [
   'My Account',
@@ -38,6 +39,17 @@ export default function AccountPage() {
           </li>
         ))}
       </ul>
+
+      <Link
+        to="/admin/login"
+        className="mt-4 flex w-full items-center justify-between rounded-[6px] border border-[#303030] bg-[#242424] px-4 py-3.5 text-sm text-white hover:bg-[#2a2a2a]"
+      >
+        <span className="flex items-center gap-2 font-semibold">
+          <Shield className="h-4 w-4 text-[#A0A0A0]" />
+          Admin Console
+        </span>
+        <ChevronRight className="h-4 w-4 text-[#A0A0A0]" />
+      </Link>
 
       <button
         type="button"

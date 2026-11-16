@@ -34,6 +34,22 @@ body {
   min-height: 100vh;
 }
 
+/* Admin forms sit on light surfaces — keep typed text visible despite body { color: #fff } */
+input:not([type='checkbox']):not([type='radio']):not([type='file']),
+textarea,
+select {
+  color: inherit;
+}
+
+.admin-field,
+[data-admin] input:not([type='checkbox']):not([type='radio']):not([type='file']),
+[data-admin] textarea,
+[data-admin] select {
+  color: #0f172a;
+  caret-color: #0f172a;
+  background-color: #ffffff;
+}
+
 /* Hide scrollbars on horizontal carousels while keeping scroll */
 .hide-scrollbar {
   -ms-overflow-style: none;

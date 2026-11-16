@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Send, Shield, Ticket, UserRoundPlus } from 'lucide-react';
 
 function SelectStep({
@@ -210,43 +211,62 @@ function DetailsStep({ selectedCount, onBack, onSubmit }) {
         </label>
 
         {useMobile ? (
-          <label className="mt-4 block">
-            <span className="text-[13px] font-bold text-[#333]">
-              Mobile Number
-            </span>
-            <input
-              type="tel"
-              value={form.mobile}
-              onChange={update('mobile')}
-              className={inputClass}
-              autoComplete="tel"
-            />
+          <div className="mt-4">
+            <label className="block" htmlFor="recipient-mobile">
+              <span className="text-[13px] font-bold text-[#333]">
+                Mobile Number
+              </span>
+              <input
+                id="recipient-mobile"
+                type="tel"
+                inputMode="tel"
+                value={form.mobile}
+                onChange={update('mobile')}
+                placeholder="(555) 555-5555"
+                className={inputClass}
+                autoComplete="tel"
+              />
+            </label>
             <button
               type="button"
-              onClick={() => setUseMobile(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setUseMobile(false);
+                setForm((prev) => ({ ...prev, mobile: '' }));
+              }}
               className="mt-2 text-[13px] font-semibold text-[#0046BE] underline underline-offset-2"
             >
               Use Email Instead
             </button>
-          </label>
+          </div>
         ) : (
-          <label className="mt-4 block">
-            <span className="text-[13px] font-bold text-[#333]">Email</span>
-            <input
-              type="email"
-              value={form.email}
-              onChange={update('email')}
-              className={inputClass}
-              autoComplete="email"
-            />
+          <div className="mt-4">
+            <label className="block" htmlFor="recipient-email">
+              <span className="text-[13px] font-bold text-[#333]">Email</span>
+              <input
+                id="recipient-email"
+                type="email"
+                value={form.email}
+                onChange={update('email')}
+                placeholder="name@example.com"
+                className={inputClass}
+                autoComplete="email"
+              />
+            </label>
             <button
               type="button"
-              onClick={() => setUseMobile(true)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setUseMobile(true);
+                setForm((prev) => ({ ...prev, email: '' }));
+              }}
               className="mt-2 text-[13px] font-semibold text-[#0046BE] underline underline-offset-2"
             >
               Use Mobile Number Instead
             </button>
-          </label>
+          </div>
         )}
 
         <label className="mt-4 block">
@@ -284,7 +304,13 @@ function DetailsStep({ selectedCount, onBack, onSubmit }) {
         </button>
         <button
           type="button"
-          onClick={() => onSubmit(form)}
+          onClick={() =>
+            onSubmit({
+              ...form,
+              email: useMobile ? '' : form.email,
+              mobile: useMobile ? form.mobile : '',
+            })
+          }
           className="rounded-md bg-[#1A1A1A] px-5 py-3 text-[14px] font-bold text-white"
         >
           Transfer {selectedCount}{' '}
@@ -296,6 +322,7 @@ function DetailsStep({ selectedCount, onBack, onSubmit }) {
 }
 
 export default function TransferTicketsSheet({ ticket, onClose }) {
+  const navigate = useNavigate();
   const seats = ticket?.seats ?? [];
   const [step, setStep] = useState('select'); // select | recipient | details
   const [selected, setSelected] = useState(() =>
@@ -374,8 +401,19 @@ export default function TransferTicketsSheet({ ticket, onClose }) {
           <DetailsStep
             selectedCount={selectedCount}
             onBack={() => setStep('recipient')}
-            onSubmit={() => {
+            onSubmit={(form) => {
               onClose();
+              navigate(`/my-tickets/${ticket.slug}/transferred`, {
+                state: {
+                  count: selectedCount,
+                  seatIds: selected,
+                  firstName: form.firstName,
+                  lastName: form.lastName,
+                  email: form.email,
+                  mobile: form.mobile,
+                  note: form.note,
+                },
+              });
             }}
           />
         )}

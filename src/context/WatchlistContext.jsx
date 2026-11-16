@@ -1,9 +1,16 @@
-import { createContext, useContext, useMemo, useState, useCallback } from 'react';
-import { allEvents } from '../data/events';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+} from 'react';
+import { useCatalog } from './CatalogContext';
 
 const WatchlistContext = createContext(null);
 
 export function WatchlistProvider({ children }) {
+  const { allEvents } = useCatalog();
   const [ids, setIds] = useState(() => {
     try {
       const saved = localStorage.getItem('tm-watchlist');
@@ -29,7 +36,7 @@ export function WatchlistProvider({ children }) {
 
   const items = useMemo(
     () => allEvents.filter((e) => ids.includes(e.id)),
-    [ids],
+    [ids, allEvents],
   );
 
   const value = useMemo(

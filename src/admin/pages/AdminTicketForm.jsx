@@ -1,0 +1,336 @@
+import { useMemo, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Plus, Trash2 } from 'lucide-react';
+import { useCatalog, uid } from '../../context/CatalogContext';
+import ImageField from '../components/ImageField';
+
+function blankSeat() {
+  return {
+    id: uid('seat'),
+    type: 'Custom Admission',
+    section: '',
+    row: '',
+    seat: '',
+  };
+}
+
+const emptyTicket = {
+  title: '',
+  displayTitle: '',
+  slug: '',
+  image: '',
+  dateLabel: '',
+  venue: '',
+  venueShort: '',
+  orderNumber: '',
+  mapQuery: '',
+  mapEmbed: '',
+  seats: [blankSeat()],
+};
+
+export default function AdminTicketForm() {
+  const { id } = useParams();
+  const isNew = !id || id === 'new';
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const { upcomingTickets, pastTickets, saveTicket, slugify } = useCatalog();
+
+  const found = useMemo(() => {
+    if (isNew) return null;
+    const up = upcomingTickets.find((t) => t.id === id);
+    if (up) return { ticket: up, bucket: 'upcoming' };
+    const past = pastTickets.find((t) => t.id === id);
+    if (past) return { ticket: past, bucket: 'past' };
+    return null;
+  }, [id, isNew, upcomingTickets, pastTickets]);
+
+  const [bucket, setBucket] = useState(
+    found?.bucket || (params.get('tab') === 'past' ? 'past' : 'upcoming'),
+  );
+  const [form, setForm] = useState(() =>
+    found?.ticket
+      ? {
+          ...emptyTicket,
+          ...found.ticket,
+          seats: found.ticket.seats?.length
+            ? found.ticket.seats.map((s) => ({ ...s }))
+            : [blankSeat()],
+        }
+      : { ...emptyTicket, seats: [blankSeat()] },
+  );
+
+  const [bulk, setBulk] = useState({
+    section: '',
+    row: '',
+    startSeat: '1',
+    count: '4',
+  });
+
+  const update = (key) => (e) =>
+    setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const updateSeat = (seatId, key, value) => {
+    setForm((prev) => ({
+      ...prev,
+      seats: prev.seats.map((s) =>
+        s.id === seatId ? { ...s, [key]: value } : s,
+      ),
+    }));
+  };
+
+  const addSeat = () =>
+    setForm((prev) => ({ ...prev, seats: [...prev.seats, blankSeat()] }));
+
+  const removeSeat = (seatId) =>
+    setForm((prev) => ({
+      ...prev,
+      seats: prev.seats.length <= 1 ? prev.seats : prev.seats.filter((s) => s.id !== seatId),
+    }));
+
+  const generateSeats = () => {
+    const section = bulk.section.trim();
+    const row = bulk.row.trim();
+    const start = Number(bulk.startSeat) || 1;
+    const count = Math.max(1, Math.min(50, Number(bulk.count) || 1));
+    if (!section || !row) return alert('Section and row are required to generate seats.');
+    const seats = Array.from({ length: count }, (_, i) => ({
+      id: uid('seat'),
+      type: 'Custom Admission',
+      section,
+      row,
+      seat: String(start + i),
+    }));
+    setForm((prev) => ({ ...prev, seats }));
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim() && !form.displayTitle.trim()) {
+      return alert('Title is required.');
+    }
+    if (!form.image.trim()) return alert('Image is required.');
+    if (form.seats.some((s) => !s.section || !s.row || !s.seat)) {
+      return alert('Every seat needs section, row, and seat number.');
+    }
+
+    const displayTitle = form.displayTitle.trim() || form.title.trim();
+    const title = form.title.trim() || displayTitle.toUpperCase();
+
+    try {
+      await saveTicket(
+        {
+          ...form,
+          id: form.id || found?.ticket?.id,
+          title,
+          displayTitle,
+          slug: form.slug.trim() || slugify(displayTitle),
+          venueShort: form.venueShort.trim() || form.venue.trim(),
+          mapQuery: form.mapQuery.trim() || form.venue.trim(),
+          seats: form.seats.map((s) => ({
+            ...s,
+            section: String(s.section),
+            row: String(s.row),
+            seat: String(s.seat),
+            type: s.type || 'Custom Admission',
+          })),
+        },
+        { bucket },
+      );
+      navigate(`/admin/tickets?tab=${bucket}`);
+    } catch (err) {
+      alert(err.message || 'Failed to save ticket');
+    }
+  };
+
+  const field =
+    'mt-1.5 w-full rounded-md border border-[#CBD5E1] px-3 py-2.5 text-[14px] outline-none focus:border-[#0F172A]';
+
+  return (
+    <div className="px-6 py-6 lg:px-8">
+      <div className="mb-6">
+        <Link to="/admin/tickets" className="text-[13px] font-semibold text-[#0369A1]">
+          ← Back to tickets
+        </Link>
+        <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">
+          {isNew ? 'Add ticket order' : 'Edit ticket order'}
+        </h1>
+      </div>
+
+      <form
+        onSubmit={onSubmit}
+        className="mx-auto max-w-3xl space-y-4 rounded-xl border border-[#E2E8F0] bg-white p-5"
+      >
+        <label className="block">
+          <span className="text-[12px] font-bold text-[#334155]">List</span>
+          <select
+            value={bucket}
+            onChange={(e) => setBucket(e.target.value)}
+            className={field}
+          >
+            <option value="upcoming">Upcoming</option>
+            <option value="past">Past</option>
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="text-[12px] font-bold text-[#334155]">Display title</span>
+          <input value={form.displayTitle} onChange={update('displayTitle')} className={field} />
+        </label>
+
+        <label className="block">
+          <span className="text-[12px] font-bold text-[#334155]">Full title (uppercase OK)</span>
+          <input value={form.title} onChange={update('title')} className={field} />
+        </label>
+
+        <label className="block">
+          <span className="text-[12px] font-bold text-[#334155]">Slug</span>
+          <input value={form.slug} onChange={update('slug')} className={field} />
+        </label>
+
+        <ImageField value={form.image} onChange={(v) => setForm((p) => ({ ...p, image: v }))} />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-[12px] font-bold text-[#334155]">Date label</span>
+            <input
+              value={form.dateLabel}
+              onChange={update('dateLabel')}
+              placeholder="SAT • JUN 12, 2027 • 6:30 PM"
+              className={field}
+            />
+          </label>
+          <label className="block">
+            <span className="text-[12px] font-bold text-[#334155]">Order number</span>
+            <input value={form.orderNumber} onChange={update('orderNumber')} className={field} />
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="text-[12px] font-bold text-[#334155]">Venue</span>
+          <input value={form.venue} onChange={update('venue')} className={field} />
+        </label>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-[12px] font-bold text-[#334155]">Short venue</span>
+            <input value={form.venueShort} onChange={update('venueShort')} className={field} />
+          </label>
+          <label className="block">
+            <span className="text-[12px] font-bold text-[#334155]">Map query</span>
+            <input value={form.mapQuery} onChange={update('mapQuery')} className={field} />
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="text-[12px] font-bold text-[#334155]">Map embed URL</span>
+          <input value={form.mapEmbed} onChange={update('mapEmbed')} className={field} />
+        </label>
+
+        <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4">
+          <h2 className="text-[14px] font-bold text-[#0F172A]">Generate seats</h2>
+          <p className="mt-1 text-[12px] text-[#64748B]">
+            Quickly create section / row / seat numbers for this order.
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-4">
+            <input
+              placeholder="Section"
+              value={bulk.section}
+              onChange={(e) => setBulk((p) => ({ ...p, section: e.target.value }))}
+              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+            />
+            <input
+              placeholder="Row"
+              value={bulk.row}
+              onChange={(e) => setBulk((p) => ({ ...p, row: e.target.value }))}
+              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+            />
+            <input
+              placeholder="Start seat"
+              value={bulk.startSeat}
+              onChange={(e) => setBulk((p) => ({ ...p, startSeat: e.target.value }))}
+              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+            />
+            <input
+              placeholder="Count"
+              value={bulk.count}
+              onChange={(e) => setBulk((p) => ({ ...p, count: e.target.value }))}
+              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={generateSeats}
+            className="mt-3 rounded-md bg-white px-3 py-2 text-[12px] font-bold text-[#0F172A] ring-1 ring-[#CBD5E1]"
+          >
+            Generate seats
+          </button>
+        </div>
+
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-[14px] font-bold text-[#0F172A]">
+              Seats ({form.seats.length})
+            </h2>
+            <button
+              type="button"
+              onClick={addSeat}
+              className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0369A1]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add seat
+            </button>
+          </div>
+          <div className="space-y-2">
+            {form.seats.map((seat) => (
+              <div
+                key={seat.id}
+                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 rounded-md border border-[#E2E8F0] p-2"
+              >
+                <input
+                  value={seat.section}
+                  onChange={(e) => updateSeat(seat.id, 'section', e.target.value)}
+                  placeholder="Section"
+                  className="rounded border border-[#CBD5E1] px-2 py-2 text-[13px]"
+                />
+                <input
+                  value={seat.row}
+                  onChange={(e) => updateSeat(seat.id, 'row', e.target.value)}
+                  placeholder="Row"
+                  className="rounded border border-[#CBD5E1] px-2 py-2 text-[13px]"
+                />
+                <input
+                  value={seat.seat}
+                  onChange={(e) => updateSeat(seat.id, 'seat', e.target.value)}
+                  placeholder="Seat #"
+                  className="rounded border border-[#CBD5E1] px-2 py-2 text-[13px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSeat(seat.id)}
+                  className="rounded p-2 text-[#DC2626] hover:bg-[#FEF2F2]"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-2">
+          <Link
+            to={`/admin/tickets?tab=${bucket}`}
+            className="rounded-md px-4 py-2.5 text-[13px] font-bold text-[#475569]"
+          >
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            className="rounded-md bg-[#0F172A] px-5 py-2.5 text-[13px] font-bold text-white"
+          >
+            Save ticket order
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

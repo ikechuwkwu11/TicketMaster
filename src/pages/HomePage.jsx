@@ -5,17 +5,7 @@ import ForYouCard from '../components/cards/ForYouCard';
 import EventCard from '../components/cards/EventCard';
 import JustAnnouncedCard from '../components/cards/JustAnnouncedCard';
 import CategoryCard from '../components/cards/CategoryCard';
-import {
-  forYouEvents,
-  lastMinuteEvents,
-  popularWeekendEvents,
-  justAnnouncedEvents,
-  concertArtists,
-  sportsEvents,
-  artsTheaterComedy,
-  familyEvents,
-  festivalEvents,
-} from '../data/events';
+import { SECTION_META, useCatalog } from '../context/CatalogContext';
 
 function Section({ title, viewAllTo, children, className = '' }) {
   return (
@@ -26,75 +16,66 @@ function Section({ title, viewAllTo, children, className = '' }) {
   );
 }
 
+function cardFor(meta, event) {
+  if (meta.card === 'forYou') return <ForYouCard key={event.id} event={event} />;
+  if (meta.card === 'justAnnounced') {
+    return <JustAnnouncedCard key={event.id} event={event} />;
+  }
+  if (meta.card === 'category') {
+    return <CategoryCard key={event.id} event={event} />;
+  }
+  return <EventCard key={event.id} event={event} />;
+}
+
 export default function HomePage() {
+  const { sections, categoryLabels, loading, error, refresh } = useCatalog();
+
   return (
     <div>
       <MobileHeader />
 
+      {loading ? (
+        <p className="px-4 py-10 text-center text-sm text-[#A0A0A0]">
+          Loading events from API…
+        </p>
+      ) : null}
+      {error ? (
+        <div className="mx-4 mt-4 rounded-md border border-[#5A1A1A] bg-[#2A1212] px-4 py-3 text-sm text-[#F5C2C2]">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={refresh}
+            className="mt-2 font-semibold text-white underline"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
+
       <div className="pt-4 md:pt-6">
-        {/* For You — no View All in screenshots */}
-        <section className="mb-7">
-          <SectionHeader title="For You" />
-          <HorizontalScroll>
-            {forYouEvents.map((event) => (
-              <ForYouCard key={event.id} event={event} />
-            ))}
-          </HorizontalScroll>
-        </section>
-
-        <Section title="Last Minute" viewAllTo="/category/last-minute">
-          {lastMinuteEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </Section>
-
-        <Section
-          title="Popular This Weekend"
-          viewAllTo="/category/popular-weekend"
-        >
-          {popularWeekendEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </Section>
-
-        <Section title="Just Announced" viewAllTo="/category/just-announced">
-          {justAnnouncedEvents.map((event) => (
-            <JustAnnouncedCard key={event.id} event={event} />
-          ))}
-        </Section>
-
-        <Section title="Concerts" viewAllTo="/category/concerts">
-          {concertArtists.map((event) => (
-            <CategoryCard key={event.id} event={event} />
-          ))}
-        </Section>
-
-        <Section title="Sports" viewAllTo="/category/sports">
-          {sportsEvents.map((event) => (
-            <CategoryCard key={event.id} event={event} />
-          ))}
-        </Section>
-
-        <Section
-          title="Arts, Theater & Comedy"
-          viewAllTo="/category/arts"
-        >
-          {artsTheaterComedy.map((event) => (
-            <CategoryCard key={event.id} event={event} />
-          ))}
-        </Section>
-
-        <Section title="Family" viewAllTo="/category/family">
-          {familyEvents.map((event) => (
-            <CategoryCard key={event.id} event={event} />
-          ))}
-        </Section>
-
-        <Section title="Festivals" viewAllTo="/category/festivals">
-          {festivalEvents.map((event) => (
-            <CategoryCard key={event.id} event={event} />
-          ))}
-        </Section>
+        {SECTION_META.map((meta) => {
+          const events = sections[meta.key] || [];
+          const title = categoryLabels[meta.path] || meta.label;
+          if (meta.key === 'forYou') {
+            return (
+              <section key={meta.key} className="mb-7">
+                <SectionHeader title={title} />
+                <HorizontalScroll>
+                  {events.map((event) => cardFor(meta, event))}
+                </HorizontalScroll>
+              </section>
+            );
+          }
+          return (
+            <Section
+              key={meta.key}
+              title={title}
+              viewAllTo={`/category/${meta.path}`}
+            >
+              {events.map((event) => cardFor(meta, event))}
+            </Section>
+          );
+        })}
       </div>
     </div>
   );

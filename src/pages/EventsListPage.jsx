@@ -1,13 +1,11 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart } from 'lucide-react';
-import {
-  categoryLabels,
-  getEventsByCategory,
-} from '../data/events';
+import { useCatalog } from '../context/CatalogContext';
 import { useWatchlist } from '../context/WatchlistContext';
 
 export default function EventsListPage() {
   const { category } = useParams();
+  const { getEventsByCategory, categoryLabels } = useCatalog();
   const events = getEventsByCategory(category);
   const title = categoryLabels[category] || 'Events';
   const { isWatched, toggle } = useWatchlist();

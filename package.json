@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backend:install": "python -m pip install -r backend/requirements.txt",
+    "backend:migrate": "python backend/manage.py migrate",
+    "backend:seed": "python backend/manage.py seed_catalog --reset",
+    "backend:run": "python backend/manage.py runserver 8000"
   },
   "dependencies": {
     "lucide-react": "^1.73.0",

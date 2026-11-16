@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Info, X } from 'lucide-react';
-import { getTicketBySlug } from '../data/tickets';
+import { useCatalog } from '../context/CatalogContext';
 import AdmissionTicketCard from '../components/tickets/AdmissionTicketCard';
 import AppleWalletButton from '../components/tickets/AppleWalletButton';
 
 export default function DigitalTicketPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { getTicketBySlug } = useCatalog();
   const ticket = getTicketBySlug(slug);
   const scrollerRef = useRef(null);
   const [index, setIndex] = useState(0);

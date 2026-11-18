@@ -81,22 +81,22 @@ export default function AdminEventForm() {
   };
 
   const field =
-    'mt-1.5 w-full rounded-md border border-[#CBD5E1] px-3 py-2.5 text-[14px] outline-none focus:border-[#0F172A]';
+    'mt-1.5 w-full rounded-md border border-[#CBD5E1] bg-white px-3 py-2.5 text-[14px] text-[#0F172A] outline-none focus:border-[#0F172A]';
 
   return (
-    <div className="px-6 py-6 lg:px-8">
-      <div className="mb-6">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mb-5 sm:mb-6">
         <Link to="/admin/events" className="text-[13px] font-semibold text-[#0369A1]">
           ← Back to events
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">
+        <h1 className="mt-2 text-xl font-bold text-[#0F172A] sm:text-2xl">
           {isNew ? 'Add event' : 'Edit event'}
         </h1>
       </div>
 
       <form
         onSubmit={onSubmit}
-        className="mx-auto max-w-3xl space-y-4 rounded-xl border border-[#E2E8F0] bg-white p-5"
+        className="mx-auto max-w-3xl space-y-4 rounded-xl border border-[#E2E8F0] bg-white p-4 sm:p-5"
       >
         <label className="block">
           <span className="text-[12px] font-bold text-[#334155]">Homepage section</span>
@@ -150,7 +150,7 @@ export default function AdminEventForm() {
           </label>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <label className="block">
             <span className="text-[12px] font-bold text-[#334155]">Month</span>
             <input value={form.month} onChange={update('month')} placeholder="APR" className={field} />
@@ -210,10 +210,10 @@ export default function AdminEventForm() {
           </label>
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end sm:gap-3">
           <Link
             to={`/admin/events?section=${sectionKey}`}
-            className="rounded-md px-4 py-2.5 text-[13px] font-bold text-[#475569]"
+            className="rounded-md px-4 py-2.5 text-center text-[13px] font-bold text-[#475569]"
           >
             Cancel
           </Link>

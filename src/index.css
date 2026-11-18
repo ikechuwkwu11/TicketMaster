@@ -23,15 +23,27 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: #111111;
   color: #ffffff;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Standalone PWA safe areas — does not change layout structure */
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Prevent accidental horizontal overflow on mobile / installed PWA */
+html,
+body {
+  overflow-x: hidden;
 }
 
 /* Admin forms sit on light surfaces — keep typed text visible despite body { color: #fff } */

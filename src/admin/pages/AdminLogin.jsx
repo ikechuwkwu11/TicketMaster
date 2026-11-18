@@ -27,10 +27,14 @@ export default function AdminLogin() {
     e.preventDefault();
     setSubmitting(true);
     setError('');
-    const ok = await login(username.trim(), password);
+    const result = await login(username.trim(), password);
     setSubmitting(false);
-    if (!ok) {
-      setError('Invalid username or password.');
+    if (!result?.ok) {
+      setError(
+        result?.reason === 'offline'
+          ? 'Cannot reach the API. Use admin / admin123 for demo mode on this host.'
+          : 'Invalid username or password.',
+      );
       return;
     }
     navigate('/admin');
@@ -43,15 +47,15 @@ export default function AdminLogin() {
     >
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-md rounded-2xl bg-white p-8 text-[#0F172A] shadow-xl"
+        className="w-full max-w-md rounded-2xl bg-white p-5 text-[#0F172A] shadow-xl sm:p-8"
       >
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#64748B]">
           TicketMaster
         </p>
         <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">Admin sign in</h1>
         <p className="mt-2 text-[13px] text-[#64748B]">
-          Connected to Django REST Framework. Manage events, tickets, seats,
-          sections, and images.
+          Manage events, tickets, seats, sections, and images. Uses the Django
+          API when available, or demo mode on the public host.
         </p>
 
         <label className="mt-6 block">

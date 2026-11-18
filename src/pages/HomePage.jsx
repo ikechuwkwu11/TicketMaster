@@ -28,18 +28,26 @@ function cardFor(meta, event) {
 }
 
 export default function HomePage() {
-  const { sections, categoryLabels, loading, error, refresh } = useCatalog();
+  const {
+    sections,
+    categoryLabels,
+    loading,
+    error,
+    refresh,
+  } = useCatalog();
+
+  const hasContent = Object.values(sections).some((list) => list?.length);
 
   return (
     <div>
       <MobileHeader />
 
-      {loading ? (
+      {loading && !hasContent ? (
         <p className="px-4 py-10 text-center text-sm text-[#A0A0A0]">
-          Loading events from API…
+          Loading events…
         </p>
       ) : null}
-      {error ? (
+      {error && !hasContent ? (
         <div className="mx-4 mt-4 rounded-md border border-[#5A1A1A] bg-[#2A1212] px-4 py-3 text-sm text-[#F5C2C2]">
           <p>{error}</p>
           <button

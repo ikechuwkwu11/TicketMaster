@@ -27,7 +27,7 @@ export default function AdmissionTicketCard({ ticket, seat }) {
       {/* Admission details */}
       <div className="flex flex-1 flex-col px-4 pb-3.5 pt-3">
         <h2 className="text-[15px] font-extrabold uppercase tracking-wide text-black">
-          Custom Admission
+          Verified Fan Presale
         </h2>
         <p className="mt-0.5 text-[12px] text-[#6B6B6B]">Reserved Seat Ticket</p>
 

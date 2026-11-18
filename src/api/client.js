@@ -162,6 +162,19 @@ export const api = {
   },
 
   resetCatalog: () => request('/catalog/reset/', { method: 'POST', body: '{}' }),
+
+  // Web Push (subscriptions only — never expose VAPID private keys here)
+  getPushVapidPublicKey: () => request('/push/vapid-public-key/'),
+  savePushSubscription: (subscription) =>
+    request('/push/subscriptions/', {
+      method: 'POST',
+      body: JSON.stringify(subscription),
+    }),
+  deletePushSubscription: (endpoint) =>
+    request('/push/subscriptions/', {
+      method: 'DELETE',
+      body: JSON.stringify({ endpoint }),
+    }),
 };
 
 export default api;

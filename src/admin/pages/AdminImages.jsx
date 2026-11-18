@@ -38,15 +38,15 @@ export default function AdminImages() {
   };
 
   return (
-    <div className="px-6 py-6 lg:px-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-[#0F172A]">Images</h1>
-        <p className="mt-1 text-[14px] text-[#64748B]">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <header className="mb-5 sm:mb-6">
+        <h1 className="text-xl font-bold text-[#0F172A] sm:text-2xl">Images</h1>
+        <p className="mt-1 text-[13px] text-[#64748B] sm:text-[14px]">
           Upload pictures or paste image URLs for events and tickets.
         </p>
       </header>
 
-      <div className="mb-6 grid gap-4 rounded-xl border border-[#E2E8F0] bg-white p-5 lg:grid-cols-2">
+      <div className="mb-6 grid gap-4 rounded-xl border border-[#E2E8F0] bg-white p-4 sm:p-5 lg:grid-cols-2">
         <div>
           <p className="text-[13px] font-bold text-[#0F172A]">Upload from device</p>
           <input
@@ -61,7 +61,7 @@ export default function AdminImages() {
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
-            className="mt-3 inline-flex items-center gap-2 rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white disabled:opacity-60"
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white disabled:opacity-60 sm:w-auto"
           >
             <Upload className="h-4 w-4" />
             {busy ? 'Uploading…' : 'Choose images'}
@@ -69,17 +69,17 @@ export default function AdminImages() {
         </div>
         <div>
           <p className="text-[13px] font-bold text-[#0F172A]">Add by URL / path</p>
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="/images/artist.jpg or https://..."
-              className="min-w-0 flex-1 rounded-md border border-[#CBD5E1] px-3 py-2.5 text-[14px]"
+              className="min-w-0 flex-1 rounded-md border border-[#CBD5E1] bg-white px-3 py-2.5 text-[14px] text-[#0F172A]"
             />
             <button
               type="button"
               onClick={addFromUrl}
-              className="rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white"
+              className="rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white sm:shrink-0"
             >
               Add
             </button>

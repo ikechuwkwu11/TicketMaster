@@ -7,7 +7,7 @@ import ImageField from '../components/ImageField';
 function blankSeat() {
   return {
     id: uid('seat'),
-    type: 'Custom Admission',
+    type: 'Verified Fan Presale',
     section: '',
     row: '',
     seat: '',
@@ -95,7 +95,7 @@ export default function AdminTicketForm() {
     if (!section || !row) return alert('Section and row are required to generate seats.');
     const seats = Array.from({ length: count }, (_, i) => ({
       id: uid('seat'),
-      type: 'Custom Admission',
+      type: 'Verified Fan Presale',
       section,
       row,
       seat: String(start + i),
@@ -131,7 +131,7 @@ export default function AdminTicketForm() {
             section: String(s.section),
             row: String(s.row),
             seat: String(s.seat),
-            type: s.type || 'Custom Admission',
+            type: s.type || 'Verified Fan Presale',
           })),
         },
         { bucket },
@@ -143,22 +143,22 @@ export default function AdminTicketForm() {
   };
 
   const field =
-    'mt-1.5 w-full rounded-md border border-[#CBD5E1] px-3 py-2.5 text-[14px] outline-none focus:border-[#0F172A]';
+    'mt-1.5 w-full rounded-md border border-[#CBD5E1] bg-white px-3 py-2.5 text-[14px] text-[#0F172A] outline-none focus:border-[#0F172A]';
 
   return (
-    <div className="px-6 py-6 lg:px-8">
-      <div className="mb-6">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mb-5 sm:mb-6">
         <Link to="/admin/tickets" className="text-[13px] font-semibold text-[#0369A1]">
           ← Back to tickets
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-[#0F172A]">
+        <h1 className="mt-2 text-xl font-bold text-[#0F172A] sm:text-2xl">
           {isNew ? 'Add ticket order' : 'Edit ticket order'}
         </h1>
       </div>
 
       <form
         onSubmit={onSubmit}
-        className="mx-auto max-w-3xl space-y-4 rounded-xl border border-[#E2E8F0] bg-white p-5"
+        className="mx-auto max-w-3xl space-y-4 rounded-xl border border-[#E2E8F0] bg-white p-4 sm:p-5"
       >
         <label className="block">
           <span className="text-[12px] font-bold text-[#334155]">List</span>
@@ -231,30 +231,30 @@ export default function AdminTicketForm() {
           <p className="mt-1 text-[12px] text-[#64748B]">
             Quickly create section / row / seat numbers for this order.
           </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <input
               placeholder="Section"
               value={bulk.section}
               onChange={(e) => setBulk((p) => ({ ...p, section: e.target.value }))}
-              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+              className="rounded-md border border-[#CBD5E1] bg-white px-3 py-2 text-[13px] text-[#0F172A]"
             />
             <input
               placeholder="Row"
               value={bulk.row}
               onChange={(e) => setBulk((p) => ({ ...p, row: e.target.value }))}
-              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+              className="rounded-md border border-[#CBD5E1] bg-white px-3 py-2 text-[13px] text-[#0F172A]"
             />
             <input
               placeholder="Start seat"
               value={bulk.startSeat}
               onChange={(e) => setBulk((p) => ({ ...p, startSeat: e.target.value }))}
-              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+              className="rounded-md border border-[#CBD5E1] bg-white px-3 py-2 text-[13px] text-[#0F172A]"
             />
             <input
               placeholder="Count"
               value={bulk.count}
               onChange={(e) => setBulk((p) => ({ ...p, count: e.target.value }))}
-              className="rounded-md border border-[#CBD5E1] px-3 py-2 text-[13px]"
+              className="rounded-md border border-[#CBD5E1] bg-white px-3 py-2 text-[13px] text-[#0F172A]"
             />
           </div>
           <button
@@ -284,30 +284,30 @@ export default function AdminTicketForm() {
             {form.seats.map((seat) => (
               <div
                 key={seat.id}
-                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 rounded-md border border-[#E2E8F0] p-2"
+                className="grid grid-cols-2 gap-2 rounded-md border border-[#E2E8F0] p-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
               >
                 <input
                   value={seat.section}
                   onChange={(e) => updateSeat(seat.id, 'section', e.target.value)}
                   placeholder="Section"
-                  className="rounded border border-[#CBD5E1] px-2 py-2 text-[13px]"
+                  className="rounded border border-[#CBD5E1] bg-white px-2 py-2 text-[13px] text-[#0F172A]"
                 />
                 <input
                   value={seat.row}
                   onChange={(e) => updateSeat(seat.id, 'row', e.target.value)}
                   placeholder="Row"
-                  className="rounded border border-[#CBD5E1] px-2 py-2 text-[13px]"
+                  className="rounded border border-[#CBD5E1] bg-white px-2 py-2 text-[13px] text-[#0F172A]"
                 />
                 <input
                   value={seat.seat}
                   onChange={(e) => updateSeat(seat.id, 'seat', e.target.value)}
                   placeholder="Seat #"
-                  className="rounded border border-[#CBD5E1] px-2 py-2 text-[13px]"
+                  className="rounded border border-[#CBD5E1] bg-white px-2 py-2 text-[13px] text-[#0F172A]"
                 />
                 <button
                   type="button"
                   onClick={() => removeSeat(seat.id)}
-                  className="rounded p-2 text-[#DC2626] hover:bg-[#FEF2F2]"
+                  className="rounded p-2 text-[#DC2626] hover:bg-[#FEF2F2] sm:justify-self-center"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -316,10 +316,10 @@ export default function AdminTicketForm() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end sm:gap-3">
           <Link
             to={`/admin/tickets?tab=${bucket}`}
-            className="rounded-md px-4 py-2.5 text-[13px] font-bold text-[#475569]"
+            className="rounded-md px-4 py-2.5 text-center text-[13px] font-bold text-[#475569]"
           >
             Cancel
           </Link>

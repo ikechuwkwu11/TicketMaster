@@ -23,6 +23,7 @@ router.register(r'bootstrap', CatalogBootstrapView, basename='bootstrap')
 urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
+    path('api/push/', include('webpush.urls')),
     path('api/catalog/reset/', CatalogResetView.as_view({'post': 'create'})),
     path('api/', include(router.urls)),
 ]

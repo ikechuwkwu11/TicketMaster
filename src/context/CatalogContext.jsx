@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { api } from '../api/client';
+import { getOfflineBootstrap } from '../data/offlineBootstrap';
 
 export const SECTION_META = [
   { key: 'forYou', label: 'For You', path: 'for-you', card: 'forYou' },
@@ -30,8 +31,41 @@ export const SECTION_META = [
   { key: 'festivals', label: 'Festivals', path: 'festivals', card: 'category' },
 ];
 
+const CACHE_KEY = 'tm-catalog-cache-v4';
+
 function emptySections() {
   return Object.fromEntries(SECTION_META.map((s) => [s.key, []]));
+}
+
+function readCachedBootstrap() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedBootstrap(data) {
+  try {
+    const payload = {
+      ...data,
+      _cachedAt: new Date().toISOString(),
+      _source: 'api',
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+function requireOnline(actionLabel = 'This action') {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new Error(
+      `${actionLabel} needs an internet connection. Browse events and tickets still work offline.`,
+    );
+  }
 }
 
 const CatalogContext = createContext(null);
@@ -59,17 +93,32 @@ export function readImageAsDataUrl(file) {
 }
 
 export function CatalogProvider({ children }) {
-  const [sections, setSections] = useState(emptySections);
-  const [upcomingTickets, setUpcomingTickets] = useState([]);
-  const [pastTickets, setPastTickets] = useState([]);
-  const [categoryLabels, setCategoryLabels] = useState(() =>
-    Object.fromEntries(SECTION_META.map((s) => [s.path, s.label])),
+  const cached = typeof window !== 'undefined' ? readCachedBootstrap() : null;
+  const initial = cached || getOfflineBootstrap();
+
+  const [sections, setSections] = useState(() => ({
+    ...emptySections(),
+    ...(initial.sections || {}),
+  }));
+  const [upcomingTickets, setUpcomingTickets] = useState(
+    () => initial.upcomingTickets || [],
   );
-  const [images, setImages] = useState([]);
+  const [pastTickets, setPastTickets] = useState(() => initial.pastTickets || []);
+  const [categoryLabels, setCategoryLabels] = useState(() => ({
+    ...Object.fromEntries(SECTION_META.map((s) => [s.path, s.label])),
+    ...(initial.categoryLabels || {}),
+  }));
+  const [images, setImages] = useState(() => initial.images || []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [offlineMode, setOfflineMode] = useState(
+    () => typeof navigator !== 'undefined' && !navigator.onLine,
+  );
+  const [dataSource, setDataSource] = useState(() =>
+    cached ? 'cache' : 'seed',
+  );
 
-  const applyBootstrap = useCallback((data) => {
+  const applyBootstrap = useCallback((data, source = 'api') => {
     setSections({ ...emptySections(), ...(data.sections || {}) });
     setUpcomingTickets(data.upcomingTickets || []);
     setPastTickets(data.pastTickets || []);
@@ -77,6 +126,7 @@ export function CatalogProvider({ children }) {
     if (data.categoryLabels) {
       setCategoryLabels((prev) => ({ ...prev, ...data.categoryLabels }));
     }
+    setDataSource(source);
   }, []);
 
   const refresh = useCallback(async () => {
@@ -84,9 +134,20 @@ export function CatalogProvider({ children }) {
     setError(null);
     try {
       const data = await api.bootstrap();
-      applyBootstrap(data);
+      applyBootstrap(data, 'api');
+      writeCachedBootstrap(data);
+      setOfflineMode(false);
     } catch (err) {
-      setError(err.message || 'Failed to load catalog from API');
+      const fallback = readCachedBootstrap() || getOfflineBootstrap();
+      applyBootstrap(fallback, fallback._source === 'seed' ? 'seed' : 'cache');
+      // Only mark offline when the device has no network — static hosts have no API.
+      setOfflineMode(typeof navigator !== 'undefined' && !navigator.onLine);
+      setError(
+        typeof navigator !== 'undefined' && !navigator.onLine
+          ? err.message ||
+              'Server unavailable — showing saved TicketMaster data offline.'
+          : null,
+      );
     } finally {
       setLoading(false);
     }
@@ -94,6 +155,20 @@ export function CatalogProvider({ children }) {
 
   useEffect(() => {
     refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    const onOffline = () => setOfflineMode(true);
+    const onOnline = () => {
+      setOfflineMode(false);
+      refresh();
+    };
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('online', onOnline);
+    };
   }, [refresh]);
 
   const allEvents = useMemo(
@@ -147,6 +222,7 @@ export function CatalogProvider({ children }) {
 
   const saveEvent = useCallback(
     async (sectionKey, event) => {
+      requireOnline('Saving events');
       const payload = {
         ...event,
         sectionKey,
@@ -169,6 +245,7 @@ export function CatalogProvider({ children }) {
 
   const deleteEvent = useCallback(
     async (sectionKey, eventId) => {
+      requireOnline('Deleting events');
       const event = (sections[sectionKey] || []).find((e) => e.id === eventId);
       await api.deleteEvent(event?.slug || eventId);
       await refresh();
@@ -178,6 +255,7 @@ export function CatalogProvider({ children }) {
 
   const moveEvent = useCallback(
     async (fromKey, toKey, eventId) => {
+      requireOnline('Moving events');
       if (fromKey === toKey) return;
       const event = (sections[fromKey] || []).find((e) => e.id === eventId);
       if (!event) return;
@@ -194,6 +272,7 @@ export function CatalogProvider({ children }) {
 
   const saveTicket = useCallback(
     async (ticket, { bucket = 'upcoming' } = {}) => {
+      requireOnline('Saving tickets');
       const payload = {
         ...ticket,
         bucket,
@@ -216,6 +295,7 @@ export function CatalogProvider({ children }) {
 
   const deleteTicket = useCallback(
     async (ticketId) => {
+      requireOnline('Deleting tickets');
       const ticket = allTickets.find((t) => t.id === ticketId);
       await api.deleteTicket(ticket?.slug || ticketId);
       await refresh();
@@ -225,6 +305,7 @@ export function CatalogProvider({ children }) {
 
   const updateCategoryLabel = useCallback(
     async (path, label) => {
+      requireOnline('Updating sections');
       const meta = SECTION_META.find((s) => s.path === path);
       if (!meta) return;
       setCategoryLabels((prev) => ({ ...prev, [path]: label }));
@@ -236,6 +317,7 @@ export function CatalogProvider({ children }) {
 
   const addImage = useCallback(
     async (fileOrData) => {
+      requireOnline('Uploading images');
       if (fileOrData instanceof File) {
         const form = new FormData();
         form.append('name', fileOrData.name);
@@ -267,6 +349,7 @@ export function CatalogProvider({ children }) {
 
   const deleteImage = useCallback(
     async (imageId) => {
+      requireOnline('Deleting images');
       await api.deleteImage(imageId);
       await refresh();
     },
@@ -274,6 +357,7 @@ export function CatalogProvider({ children }) {
   );
 
   const resetCatalog = useCallback(async () => {
+    requireOnline('Resetting catalog');
     await api.resetCatalog();
     await refresh();
   }, [refresh]);
@@ -287,6 +371,8 @@ export function CatalogProvider({ children }) {
       images,
       loading,
       error,
+      offlineMode,
+      dataSource,
       refresh,
       allEvents,
       allTickets,
@@ -315,6 +401,8 @@ export function CatalogProvider({ children }) {
       images,
       loading,
       error,
+      offlineMode,
+      dataSource,
       refresh,
       allEvents,
       allTickets,

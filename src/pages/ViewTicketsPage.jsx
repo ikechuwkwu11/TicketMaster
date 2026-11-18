@@ -94,13 +94,13 @@ export default function ViewTicketsPage() {
         </div>
       </header>
 
-      {/* Hero + dark event card — date/title overlaid so they stay visible above transfer sheet */}
-      <section ref={heroRef} className="relative bg-[#111111]">
+      {/* Hero + inset Ticketmaster event card (date step, side gutters) */}
+      <section ref={heroRef} className="relative bg-[#F2F2F2]">
         <div
           className={`relative overflow-hidden ${
             transferOpen
-              ? 'h-[24vh] min-h-[180px]'
-              : 'h-[42vh] min-h-[260px] max-h-[340px]'
+              ? 'h-[28vh] min-h-[200px]'
+              : 'h-[42vh] min-h-[260px] max-h-[360px]'
           }`}
         >
           <img
@@ -108,9 +108,9 @@ export default function ViewTicketsPage() {
             alt={ticket.title}
             className="h-full w-full object-cover object-top"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/85" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
 
-          <div className="absolute inset-x-0 top-0 flex items-center justify-between px-3 pt-3">
+          <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-3 pt-3">
             <Link
               to="/my-tickets"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
@@ -125,38 +125,44 @@ export default function ViewTicketsPage() {
               Help
             </button>
           </div>
-
-          {/* Overlaid on image — stays visible above the tall transfer sheet */}
-          <div className="absolute inset-x-0 bottom-0 px-4 pb-3">
-            <span className="inline-block bg-black/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-              {ticket.dateLabel}
-            </span>
-            <h1 className="mt-1.5 text-[18px] font-extrabold uppercase leading-tight tracking-wide text-white sm:text-[20px]">
-              {ticket.title}
-            </h1>
-          </div>
         </div>
 
-        {!transferOpen && (
-          <div className="relative px-4 pb-4 pt-3">
-            <div className="flex items-end justify-between gap-3">
-              <p className="text-[14px] text-[#A0A0A0]">{ticket.venue}</p>
-              <span className="flex shrink-0 items-center gap-1.5 text-[14px] font-semibold text-white">
-                <Ticket className="h-4 w-4" strokeWidth={2.25} />
-                x{ticket.quantity}
-              </span>
-            </div>
-
+        {/* Pulls up over the photo; mx creates the side white space */}
+        <div
+          className={`relative z-10 px-3 sm:px-4 ${
+            transferOpen ? '-mt-16' : '-mt-[7.25rem]'
+          }`}
+        >
+          <div className="inline-block bg-black px-2.5 py-1.5">
+            <p className="whitespace-nowrap text-[11px] font-medium tracking-wide text-white">
+              {ticket.dateLabel}
+            </p>
+          </div>
+          <div className="bg-black px-3 pb-3 pt-2.5">
+            <h1 className="text-[18px] font-extrabold uppercase leading-[1.15] tracking-wide text-white sm:text-[20px]">
+              {ticket.title}
+            </h1>
+            {!transferOpen ? (
+              <div className="mt-2 flex items-end justify-between gap-3">
+                <p className="text-[13px] text-white">{ticket.venue}</p>
+                <span className="flex shrink-0 items-center gap-1.5 text-[13px] font-semibold text-white">
+                  <Ticket className="h-4 w-4" strokeWidth={2.25} />
+                  x{ticket.quantity}
+                </span>
+              </div>
+            ) : null}
+          </div>
+          {!transferOpen ? (
             <button
               type="button"
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-[#075BE8] py-3.5 text-[15px] font-bold text-white"
+              className="flex w-full items-center justify-center gap-2 bg-[#026CDF] py-3.5 text-[15px] font-bold text-white"
               onClick={() => navigate(admissionPath)}
             >
               <ScanBarcode className="h-5 w-5" />
               View Tickets
             </button>
-          </div>
-        )}
+          ) : null}
+        </div>
       </section>
 
       {/* Light content area */}
@@ -203,10 +209,10 @@ export default function ViewTicketsPage() {
             <div id="ticket-list" className="bg-[#F5F5F5] px-4 pb-2 pt-4">
               <div className="mb-3 flex items-start justify-between">
                 <div>
-                  <h2 className="text-[18px] font-bold text-black">
+                  <h2 className="text-[15px] font-bold text-black">
                     Order #{ticket.orderNumber}
                   </h2>
-                  <p className="mt-0.5 text-[13px] text-[#6B6B6B]">
+                  <p className="mt-0.5 text-[12px] text-[#6B6B6B]">
                     x{ticket.quantity} Tickets
                   </p>
                 </div>

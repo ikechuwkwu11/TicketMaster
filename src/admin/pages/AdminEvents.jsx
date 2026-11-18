@@ -10,30 +10,30 @@ export default function AdminEvents() {
   const meta = SECTION_META.find((s) => s.key === sectionKey);
 
   return (
-    <div className="px-6 py-6 lg:px-8">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <header className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A]">Events</h1>
-          <p className="mt-1 text-[14px] text-[#64748B]">
+          <h1 className="text-xl font-bold text-[#0F172A] sm:text-2xl">Events</h1>
+          <p className="mt-1 text-[13px] text-[#64748B] sm:text-[14px]">
             Add, edit, or remove events in any homepage section.
           </p>
         </div>
         <Link
           to={`/admin/events/new?section=${sectionKey}`}
-          className="inline-flex items-center gap-2 rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Add event
         </Link>
       </header>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {SECTION_META.map((s) => (
           <button
             key={s.key}
             type="button"
             onClick={() => setParams({ section: s.key })}
-            className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold ${
               sectionKey === s.key
                 ? 'bg-[#0F172A] text-white'
                 : 'bg-white text-[#475569] ring-1 ring-[#E2E8F0]'
@@ -57,18 +57,18 @@ export default function AdminEvents() {
             {events.map((event) => (
               <li
                 key={event.id}
-                className="flex items-center gap-3 border-t border-[#E2E8F0] px-4 py-3 first:border-t-0"
+                className="flex items-center gap-2.5 border-t border-[#E2E8F0] px-3 py-3 first:border-t-0 sm:gap-3 sm:px-4"
               >
                 <img
                   src={event.image}
                   alt=""
-                  className="h-14 w-20 shrink-0 rounded object-cover"
+                  className="h-12 w-16 shrink-0 rounded object-cover sm:h-14 sm:w-20"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-bold text-[#0F172A]">
+                  <p className="truncate text-[13px] font-bold text-[#0F172A] sm:text-[14px]">
                     {event.title}
                   </p>
-                  <p className="truncate text-[12px] text-[#64748B]">
+                  <p className="truncate text-[11px] text-[#64748B] sm:text-[12px]">
                     {event.dateLabel ||
                       [event.month, event.day, event.year].filter(Boolean).join(' ') ||
                       event.location ||

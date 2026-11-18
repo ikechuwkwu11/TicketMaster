@@ -402,6 +402,12 @@ export default function TransferTicketsSheet({ ticket, onClose }) {
             selectedCount={selectedCount}
             onBack={() => setStep('recipient')}
             onSubmit={(form) => {
+              if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                alert(
+                  'Transfers need an internet connection. You can still browse your tickets offline.',
+                );
+                return;
+              }
               onClose();
               navigate(`/my-tickets/${ticket.slug}/transferred`, {
                 state: {

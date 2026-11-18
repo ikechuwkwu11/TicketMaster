@@ -9,24 +9,26 @@ export default function AdminTickets() {
   const list = tab === 'past' ? pastTickets : upcomingTickets;
 
   return (
-    <div className="px-6 py-6 lg:px-8">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
+      <header className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A]">Tickets & seats</h1>
-          <p className="mt-1 text-[14px] text-[#64748B]">
+          <h1 className="text-xl font-bold text-[#0F172A] sm:text-2xl">
+            Tickets & seats
+          </h1>
+          <p className="mt-1 text-[13px] text-[#64748B] sm:text-[14px]">
             Manage owned ticket orders, sections, rows, and seat numbers.
           </p>
         </div>
         <Link
           to={`/admin/tickets/new?tab=${tab}`}
-          className="inline-flex items-center gap-2 rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#0F172A] px-4 py-2.5 text-[13px] font-bold text-white sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Add ticket order
         </Link>
       </header>
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {[
           ['upcoming', `Upcoming (${upcomingTickets.length})`],
           ['past', `Past (${pastTickets.length})`],
@@ -35,7 +37,7 @@ export default function AdminTickets() {
             key={key}
             type="button"
             onClick={() => setParams({ tab: key })}
-            className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold ${
               tab === key
                 ? 'bg-[#0F172A] text-white'
                 : 'bg-white text-[#475569] ring-1 ring-[#E2E8F0]'
@@ -56,18 +58,18 @@ export default function AdminTickets() {
             {list.map((ticket) => (
               <li
                 key={ticket.id}
-                className="flex items-center gap-3 border-t border-[#E2E8F0] px-4 py-3 first:border-t-0"
+                className="flex items-center gap-2.5 border-t border-[#E2E8F0] px-3 py-3 first:border-t-0 sm:gap-3 sm:px-4"
               >
                 <img
                   src={ticket.image}
                   alt=""
-                  className="h-14 w-20 shrink-0 rounded object-cover"
+                  className="h-12 w-16 shrink-0 rounded object-cover sm:h-14 sm:w-20"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-bold text-[#0F172A]">
+                  <p className="truncate text-[13px] font-bold text-[#0F172A] sm:text-[14px]">
                     {ticket.displayTitle || ticket.title}
                   </p>
-                  <p className="truncate text-[12px] text-[#64748B]">
+                  <p className="truncate text-[11px] text-[#64748B] sm:text-[12px]">
                     {ticket.dateLabel} · {ticket.seats?.length || 0} seats ·{' '}
                     {ticket.orderNumber}
                   </p>

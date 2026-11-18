@@ -42,12 +42,12 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="px-6 py-6 lg:px-8">
+    <div className="px-4 py-5 sm:px-6 lg:px-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-[#0F172A]">Dashboard</h1>
-        <p className="mt-1 text-[14px] text-[#64748B]">
+        <h1 className="text-xl font-bold text-[#0F172A] sm:text-2xl">Dashboard</h1>
+        <p className="mt-1 text-[13px] leading-relaxed text-[#64748B] sm:text-[14px]">
           Live data from Django REST Framework at{' '}
-          <code className="rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[12px]">
+          <code className="break-all rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[12px]">
             /api/bootstrap/
           </code>
         </p>
@@ -97,35 +97,37 @@ export default function AdminDashboard() {
           </Link>
         </div>
         <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
-          <table className="w-full text-left text-[13px]">
-            <thead className="bg-[#F8FAFC] text-[#64748B]">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Section</th>
-                <th className="px-4 py-3 font-semibold">Items</th>
-                <th className="px-4 py-3 font-semibold">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {SECTION_META.map((s) => (
-                <tr key={s.key} className="border-t border-[#E2E8F0]">
-                  <td className="px-4 py-3 font-semibold text-[#0F172A]">
-                    {s.label}
-                  </td>
-                  <td className="px-4 py-3 text-[#475569]">
-                    {(sections[s.key] || []).length}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link
-                      to={`/admin/events?section=${s.key}`}
-                      className="font-semibold text-[#0369A1]"
-                    >
-                      Edit events
-                    </Link>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[320px] text-left text-[13px]">
+              <thead className="bg-[#F8FAFC] text-[#64748B]">
+                <tr>
+                  <th className="px-3 py-3 font-semibold sm:px-4">Section</th>
+                  <th className="px-3 py-3 font-semibold sm:px-4">Items</th>
+                  <th className="px-3 py-3 font-semibold sm:px-4">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {SECTION_META.map((s) => (
+                  <tr key={s.key} className="border-t border-[#E2E8F0]">
+                    <td className="px-3 py-3 font-semibold text-[#0F172A] sm:px-4">
+                      {s.label}
+                    </td>
+                    <td className="px-3 py-3 text-[#475569] sm:px-4">
+                      {(sections[s.key] || []).length}
+                    </td>
+                    <td className="px-3 py-3 sm:px-4">
+                      <Link
+                        to={`/admin/events?section=${s.key}`}
+                        className="font-semibold text-[#0369A1]"
+                      >
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 

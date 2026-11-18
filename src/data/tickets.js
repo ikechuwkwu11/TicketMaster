@@ -6,7 +6,7 @@
 function makeSeats(section, row, startSeat, count) {
   return Array.from({ length: count }, (_, i) => ({
     id: `seat-${section}-${row}-${startSeat + i}`,
-    type: 'Custom Admission',
+    type: 'Verified Fan Presale',
     section: String(section),
     row: String(row),
     seat: String(startSeat + i),
@@ -15,12 +15,28 @@ function makeSeats(section, row, startSeat, count) {
 
 export const upcomingTickets = [
   {
+    id: 't-2',
+    slug: 'olivia-rodrigo-unraveled-tour',
+    title: 'OLIVIA RODRIGO W/ DEVON AGAIN',
+    displayTitle: 'Olivia Rodrigo w/ Devon Again',
+    image: '/images/olivia-rodrigo.jpg',
+    dateLabel: 'Sat · Dec 19 2026 · 7:00 PM',
+    venue: 'T-Mobile Arena, Las Vegas',
+    venueShort: 'T-Mobile Arena, Las Vegas',
+    quantity: 3,
+    orderNumber: '61-803631/TMQ',
+    seats: makeSeats(11, 'W', 4, 3),
+    mapQuery: 'T-Mobile Arena Las Vegas',
+    mapEmbed:
+      'https://www.openstreetmap.org/export/embed.html?bbox=-115.195%2C36.092%2C-115.162%2C36.114&layer=mapnik&marker=36.1028%2C-115.1782',
+  },
+  {
     id: 't-1',
     slug: 'noah-kahan-last-of-the-bugs',
     title: 'NOAH KAHAN: THE LAST OF THE BUGS WORLD TOUR',
     displayTitle: 'Noah Kahan: The Last of the Bugs World Tour',
     image: '/images/noah-kahan.jpg',
-    dateLabel: 'SAT • JUN 12, 2027 • 6:30 PM',
+    dateLabel: 'Sat · Jun 12, 2027 · 6:30 PM',
     venue: 'Highmark Stadium - Orchard Park, NY',
     venueShort: 'Highmark Stadium Orchard Park',
     quantity: 4,
@@ -29,22 +45,6 @@ export const upcomingTickets = [
     mapQuery: 'Highmark Stadium Orchard Park NY',
     mapEmbed:
       'https://www.openstreetmap.org/export/embed.html?bbox=-78.880%2C42.768%2C-78.850%2C42.788&layer=mapnik&marker=42.778%2C-78.865',
-  },
-  {
-    id: 't-2',
-    slug: 'olivia-rodrigo-unraveled-tour',
-    title: 'OLIVIA RODRIGO: THE UNRAVELED TOUR',
-    displayTitle: 'Olivia Rodrigo: The Unraveled Tour',
-    image: '/images/olivia-rodrigo.jpg',
-    dateLabel: 'SAT • DEC 19, 2026 • 7:00 PM',
-    venue: 'TMobile Arena Las Vegas',
-    venueShort: 'TMobile Arena Las Vegas',
-    quantity: 4,
-    orderNumber: '12-68027/TMO',
-    seats: makeSeats(10, 'C', 3, 4),
-    mapQuery: 'T-Mobile Arena Las Vegas',
-    mapEmbed:
-      'https://www.openstreetmap.org/export/embed.html?bbox=-115.195%2C36.092%2C-115.162%2C36.114&layer=mapnik&marker=36.1028%2C-115.1782',
   },
   {
     id: 't-3',

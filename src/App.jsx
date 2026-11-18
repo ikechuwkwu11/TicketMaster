@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { WatchlistProvider } from './context/WatchlistContext';
 import { CatalogProvider } from './context/CatalogContext';
 import { AdminAuthProvider } from './admin/AdminAuthContext';
@@ -22,13 +22,22 @@ import AdminTickets from './admin/pages/AdminTickets';
 import AdminTicketForm from './admin/pages/AdminTicketForm';
 import AdminSections from './admin/pages/AdminSections';
 import AdminImages from './admin/pages/AdminImages';
+import InstallPrompt from './components/pwa/InstallPrompt';
+import UpdatePrompt from './components/pwa/UpdatePrompt';
+import OfflineBanner from './components/pwa/OfflineBanner';
+import IosStandaloneNavFix from './components/pwa/IosStandaloneNavFix';
 
 export default function App() {
   return (
     <CatalogProvider>
       <WatchlistProvider>
         <AdminAuthProvider>
-          <BrowserRouter>
+          {/* HashRouter keeps iOS Home Screen apps from escaping into Safari on tab changes */}
+          <HashRouter>
+            <IosStandaloneNavFix />
+            <OfflineBanner />
+            <UpdatePrompt />
+            <InstallPrompt />
             <Routes>
               <Route path="admin/login" element={<AdminLogin />} />
               <Route path="admin" element={<AdminLayout />}>
@@ -62,7 +71,7 @@ export default function App() {
                 <Route path="search" element={<SearchPage />} />
               </Route>
             </Routes>
-          </BrowserRouter>
+          </HashRouter>
         </AdminAuthProvider>
       </WatchlistProvider>
     </CatalogProvider>

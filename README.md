@@ -64,3 +64,48 @@ Set `VITE_API_BASE_URL=http://localhost:8000/api` in `.env` (see `.env.example`)
 
 - Username: `admin`
 - Password: `admin123`
+
+## Progressive Web App (PWA)
+
+The React app is installable as a PWA via `vite-plugin-pwa`.
+
+- Manifest + icons in `public/`
+- Custom service worker: `src/sw.js` (static caching; `/api` is NetworkOnly)
+- Offline fallback: `public/offline.html`
+- Install / update prompts in the UI
+- Push subscription endpoints: `GET /api/push/vapid-public-key/`, `POST|DELETE /api/push/subscriptions/`
+
+### Enable Web Push (optional)
+
+1. Generate VAPID keys (keep the private key server-side only).
+2. Add to `backend/.env`:
+
+```env
+VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_ADMIN_EMAIL=mailto:admin@yourdomain.com
+```
+
+3. Users opt in from **Account → Enable notifications**.
+4. Send messages from Django with `webpush.services.send_push_notification(...)`.
+
+### Offline mode
+
+After you open the app once while online:
+
+- Events, tickets, search, and navigation keep working offline (saved catalog + cached app shell).
+- Transfers, admin edits, uploads, and payments require a connection (they will not fake success offline).
+
+For a real offline PWA test (service worker):
+
+```bash
+npm run preview:pwa
+```
+
+Then open the Network URL on your phone, Add to Home Screen, turn on Airplane Mode, and reopen the icon.
+
+### Test install
+
+- **Android Chrome:** open the site over HTTPS (or localhost) → Install / Add to Home Screen.
+- **iPhone Safari:** Share → Add to Home Screen (iOS does not use `beforeinstallprompt`).
+- Production PWAs require HTTPS.

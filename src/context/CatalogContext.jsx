@@ -31,7 +31,7 @@ export const SECTION_META = [
   { key: 'festivals', label: 'Festivals', path: 'festivals', card: 'category' },
 ];
 
-const CACHE_KEY = 'tm-catalog-cache-v4';
+const CACHE_KEY = 'tm-catalog-cache-v5';
 
 function emptySections() {
   return Object.fromEntries(SECTION_META.map((s) => [s.key, []]));
@@ -272,9 +272,9 @@ export function CatalogProvider({ children }) {
 
   const saveTicket = useCallback(
     async (ticket, { bucket = 'upcoming' } = {}) => {
-      requireOnline('Saving tickets');
       const payload = {
         ...ticket,
+        id: ticket.id || uid('t'),
         bucket,
         slug:
           ticket.slug ||
@@ -282,15 +282,60 @@ export function CatalogProvider({ children }) {
           uid('ticket'),
         quantity: ticket.seats?.length || ticket.quantity || 0,
       };
-      if (ticket.id || ticket.slug) {
-        await api.updateTicket(ticket.slug || ticket.id, payload);
-      } else {
-        await api.createTicket(payload);
+
+      const match = (t) =>
+        (payload.id && t.id === payload.id) ||
+        (payload.slug && t.slug === payload.slug);
+
+      const upsert = (list, include) => {
+        const without = list.filter((t) => !match(t));
+        if (!include) return without;
+        const idx = list.findIndex(match);
+        if (idx >= 0) {
+          const next = [...list];
+          next[idx] = { ...list[idx], ...payload };
+          return next;
+        }
+        return [...without, payload];
+      };
+
+      const nextUpcoming = upsert(upcomingTickets, bucket === 'upcoming');
+      const nextPast = upsert(pastTickets, bucket === 'past');
+
+      // Update React state immediately so My Tickets / Ticket Details refresh now.
+      setUpcomingTickets(nextUpcoming);
+      setPastTickets(nextPast);
+      writeCachedBootstrap({
+        sections,
+        upcomingTickets: nextUpcoming,
+        pastTickets: nextPast,
+        images,
+        categoryLabels,
+      });
+
+      try {
+        if (typeof navigator !== 'undefined' && navigator.onLine) {
+          if (ticket.id || ticket.slug) {
+            await api.updateTicket(ticket.slug || ticket.id, payload);
+          } else {
+            await api.createTicket(payload);
+          }
+          await refresh();
+        }
+      } catch {
+        // Static host / API down — local catalog already updated.
       }
-      await refresh();
+
       return payload;
     },
-    [refresh],
+    [
+      refresh,
+      sections,
+      images,
+      categoryLabels,
+      upcomingTickets,
+      pastTickets,
+    ],
   );
 
   const deleteTicket = useCallback(
@@ -317,43 +362,107 @@ export function CatalogProvider({ children }) {
 
   const addImage = useCallback(
     async (fileOrData) => {
-      requireOnline('Uploading images');
+      let localEntry = null;
+
       if (fileOrData instanceof File) {
-        const form = new FormData();
-        form.append('name', fileOrData.name);
-        form.append('file', fileOrData);
-        const created = await api.createImage(form);
-        await refresh();
-        return created;
-      }
-      if (typeof fileOrData === 'object' && fileOrData.url) {
-        const created = await api.createImage({
+        const dataUrl = await readImageAsDataUrl(fileOrData);
+        localEntry = {
+          id: uid('img'),
+          name: fileOrData.name || 'Upload',
+          url: dataUrl,
+        };
+
+        // Prefer Django when it is reachable; otherwise keep the local data URL.
+        try {
+          if (typeof navigator !== 'undefined' && navigator.onLine) {
+            const form = new FormData();
+            form.append('name', fileOrData.name);
+            form.append('file', fileOrData);
+            const created = await api.createImage(form);
+            if (created?.url) {
+              localEntry = {
+                id: created.id || localEntry.id,
+                name: created.name || localEntry.name,
+                url: created.url,
+              };
+            }
+          }
+        } catch {
+          // Static host returns 405 for POST /api/images — local upload still works.
+        }
+      } else if (typeof fileOrData === 'object' && fileOrData?.url) {
+        localEntry = {
+          id: uid('img'),
           name: fileOrData.name || 'Image',
           url: fileOrData.url,
-        });
-        await refresh();
-        return created;
+        };
+        try {
+          if (typeof navigator !== 'undefined' && navigator.onLine) {
+            const created = await api.createImage({
+              name: localEntry.name,
+              url: localEntry.url,
+            });
+            if (created?.url) localEntry = { ...localEntry, ...created };
+          }
+        } catch {
+          /* keep local */
+        }
+      } else if (typeof fileOrData === 'string') {
+        localEntry = { id: uid('img'), name: 'Image', url: fileOrData };
+        try {
+          if (typeof navigator !== 'undefined' && navigator.onLine) {
+            const created = await api.createImage({
+              name: 'Image',
+              url: fileOrData,
+            });
+            if (created?.url) localEntry = { ...localEntry, ...created };
+          }
+        } catch {
+          /* keep local */
+        }
       }
-      if (typeof fileOrData === 'string') {
-        const created = await api.createImage({
-          name: 'Image',
-          url: fileOrData,
+
+      if (!localEntry?.url) return null;
+
+      setImages((prev) => {
+        const next = [localEntry, ...prev.filter((img) => img.url !== localEntry.url)];
+        writeCachedBootstrap({
+          sections,
+          upcomingTickets,
+          pastTickets,
+          images: next,
+          categoryLabels,
         });
-        await refresh();
-        return created;
-      }
-      return null;
+        return next;
+      });
+
+      return localEntry;
     },
-    [refresh],
+    [sections, upcomingTickets, pastTickets, categoryLabels],
   );
 
   const deleteImage = useCallback(
     async (imageId) => {
-      requireOnline('Deleting images');
-      await api.deleteImage(imageId);
-      await refresh();
+      setImages((prev) => {
+        const next = prev.filter((img) => img.id !== imageId);
+        writeCachedBootstrap({
+          sections,
+          upcomingTickets,
+          pastTickets,
+          images: next,
+          categoryLabels,
+        });
+        return next;
+      });
+      try {
+        if (typeof navigator !== 'undefined' && navigator.onLine) {
+          await api.deleteImage(imageId);
+        }
+      } catch {
+        /* local delete already applied */
+      }
     },
-    [refresh],
+    [sections, upcomingTickets, pastTickets, categoryLabels],
   );
 
   const resetCatalog = useCallback(async () => {

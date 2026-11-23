@@ -98,7 +98,11 @@ export default function AdminImages() {
               key={img.id}
               className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white"
             >
-              <img src={img.url} alt="" className="aspect-[4/3] w-full object-cover" />
+              <img
+                src={img.url}
+                alt=""
+                className="aspect-[4/3] w-full bg-[#F1F5F9] object-contain object-center"
+              />
               <div className="flex items-start justify-between gap-2 p-3">
                 <div className="min-w-0">
                   <p className="truncate text-[12px] font-semibold text-[#0F172A]">

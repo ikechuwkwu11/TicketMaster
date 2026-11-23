@@ -25,6 +25,16 @@ const emptyTicket = {
   orderNumber: '',
   mapQuery: '',
   mapEmbed: '',
+  entryInfo: 'Mobile Ticket',
+  ticketInfoNote: 'NO PROF CAMS VID/AUD REC',
+  city: '',
+  entrance: '',
+  purchaseDate: '',
+  faceValue: '200.00',
+  grandTotal: '216.44',
+  ticketType: 'Verified Fan Presale',
+  barcode: '',
+  terms: '',
   seats: [blankSeat()],
 };
 
@@ -95,7 +105,7 @@ export default function AdminTicketForm() {
     if (!section || !row) return alert('Section and row are required to generate seats.');
     const seats = Array.from({ length: count }, (_, i) => ({
       id: uid('seat'),
-      type: 'Verified Fan Presale',
+      type: form.ticketType || 'Verified Fan Presale',
       section,
       row,
       seat: String(start + i),
@@ -131,7 +141,7 @@ export default function AdminTicketForm() {
             section: String(s.section),
             row: String(s.row),
             seat: String(s.seat),
-            type: s.type || 'Verified Fan Presale',
+            type: s.type || form.ticketType || 'Verified Fan Presale',
           })),
         },
         { bucket },
@@ -225,6 +235,76 @@ export default function AdminTicketForm() {
           <span className="text-[12px] font-bold text-[#334155]">Map embed URL</span>
           <input value={form.mapEmbed} onChange={update('mapEmbed')} className={field} />
         </label>
+
+        <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4">
+          <h2 className="text-[14px] font-bold text-[#0F172A]">Ticket Details page</h2>
+          <p className="mt-1 text-[12px] text-[#64748B]">
+            These fields power the Ticket Info screen in the app.
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Entry info</span>
+              <input value={form.entryInfo} onChange={update('entryInfo')} className={field} />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Ticket type</span>
+              <input value={form.ticketType} onChange={update('ticketType')} className={field} />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Entrance</span>
+              <input
+                value={form.entrance}
+                onChange={update('entrance')}
+                placeholder="BLOCK 11"
+                className={field}
+              />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">City</span>
+              <input value={form.city} onChange={update('city')} className={field} />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Purchase date</span>
+              <input
+                value={form.purchaseDate}
+                onChange={update('purchaseDate')}
+                placeholder="SUN, NOV 1, 2026 • 2:16 PM"
+                className={field}
+              />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Barcode (optional)</span>
+              <input value={form.barcode} onChange={update('barcode')} className={field} />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Face value</span>
+              <input value={form.faceValue} onChange={update('faceValue')} className={field} />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Grand total</span>
+              <input value={form.grandTotal} onChange={update('grandTotal')} className={field} />
+            </label>
+          </div>
+          <label className="mt-3 block">
+            <span className="text-[12px] font-bold text-[#334155]">Ticket info note</span>
+            <input
+              value={form.ticketInfoNote}
+              onChange={update('ticketInfoNote')}
+              placeholder="NO PROF CAMS VID/AUD REC"
+              className={field}
+            />
+          </label>
+          <label className="mt-3 block">
+            <span className="text-[12px] font-bold text-[#334155]">Terms &amp; conditions</span>
+            <textarea
+              value={form.terms}
+              onChange={update('terms')}
+              rows={4}
+              className={field}
+              placeholder="Leave blank to use the default Ticketmaster-style terms."
+            />
+          </label>
+        </div>
 
         <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4">
           <h2 className="text-[14px] font-bold text-[#0F172A]">Generate seats</h2>

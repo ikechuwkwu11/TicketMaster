@@ -17,7 +17,7 @@ export default function AdmissionTicketCard({ ticket, seat }) {
         <img
           src={ticket.image}
           alt=""
-          className="aspect-[5/4] w-full object-cover object-[center_20%]"
+          className="aspect-[5/4] w-full bg-[#111] object-contain object-center"
         />
         <div className="absolute inset-x-3 top-2.5">
           <SafeTixBarcode seed={seed} />

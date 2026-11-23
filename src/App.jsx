@@ -10,9 +10,12 @@ import WatchlistPage from './pages/WatchlistPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import ViewTicketsPage from './pages/ViewTicketsPage';
 import DigitalTicketPage from './pages/DigitalTicketPage';
+import TicketDetailsPage from './pages/TicketDetailsPage';
 import TransferredPage from './pages/TransferredPage';
 import AccountPage from './pages/AccountPage';
+import EditDetailsPage from './pages/EditDetailsPage';
 import SearchPage from './pages/SearchPage';
+import { UserProfileProvider } from './context/UserProfileContext';
 import AdminLayout from './admin/AdminLayout';
 import AdminLogin from './admin/pages/AdminLogin';
 import AdminDashboard from './admin/pages/AdminDashboard';
@@ -31,48 +34,55 @@ export default function App() {
   return (
     <CatalogProvider>
       <WatchlistProvider>
-        <AdminAuthProvider>
-          {/* HashRouter keeps iOS Home Screen apps from escaping into Safari on tab changes */}
-          <HashRouter>
-            <IosStandaloneNavFix />
-            <OfflineBanner />
-            <UpdatePrompt />
-            <InstallPrompt />
-            <Routes>
-              <Route path="admin/login" element={<AdminLogin />} />
-              <Route path="admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="events" element={<AdminEvents />} />
-                <Route path="events/new" element={<AdminEventForm />} />
-                <Route path="events/:id" element={<AdminEventForm />} />
-                <Route path="tickets" element={<AdminTickets />} />
-                <Route path="tickets/new" element={<AdminTicketForm />} />
-                <Route path="tickets/:id" element={<AdminTicketForm />} />
-                <Route path="sections" element={<AdminSections />} />
-                <Route path="images" element={<AdminImages />} />
-              </Route>
+        <UserProfileProvider>
+          <AdminAuthProvider>
+            {/* HashRouter keeps iOS Home Screen apps from escaping into Safari on tab changes */}
+            <HashRouter>
+              <IosStandaloneNavFix />
+              <OfflineBanner />
+              <UpdatePrompt />
+              <InstallPrompt />
+              <Routes>
+                <Route path="admin/login" element={<AdminLogin />} />
+                <Route path="admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="events" element={<AdminEvents />} />
+                  <Route path="events/new" element={<AdminEventForm />} />
+                  <Route path="events/:id" element={<AdminEventForm />} />
+                  <Route path="tickets" element={<AdminTickets />} />
+                  <Route path="tickets/new" element={<AdminTicketForm />} />
+                  <Route path="tickets/:id" element={<AdminTicketForm />} />
+                  <Route path="sections" element={<AdminSections />} />
+                  <Route path="images" element={<AdminImages />} />
+                </Route>
 
-              <Route element={<Layout />}>
-                <Route index element={<HomePage />} />
-                <Route path="event/:slug" element={<EventDetailPage />} />
-                <Route path="category/:category" element={<EventsListPage />} />
-                <Route path="watchlist" element={<WatchlistPage />} />
-                <Route path="my-tickets" element={<MyTicketsPage />} />
-                <Route path="my-tickets/:slug" element={<ViewTicketsPage />} />
-                <Route
-                  path="my-tickets/:slug/admission"
-                  element={<DigitalTicketPage />}
-                />
-                <Route
-                  path="my-tickets/:slug/transferred"
-                  element={<TransferredPage />}
-                />
-                <Route path="account" element={<AccountPage />} />
-                <Route path="search" element={<SearchPage />} />
-              </Route>
-            </Routes>
-          </HashRouter>
-        </AdminAuthProvider>
+                <Route element={<Layout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="event/:slug" element={<EventDetailPage />} />
+                  <Route path="category/:category" element={<EventsListPage />} />
+                  <Route path="watchlist" element={<WatchlistPage />} />
+                  <Route path="my-tickets" element={<MyTicketsPage />} />
+                  <Route path="my-tickets/:slug" element={<ViewTicketsPage />} />
+                  <Route
+                    path="my-tickets/:slug/admission"
+                    element={<DigitalTicketPage />}
+                  />
+                  <Route
+                    path="my-tickets/:slug/details"
+                    element={<TicketDetailsPage />}
+                  />
+                  <Route
+                    path="my-tickets/:slug/transferred"
+                    element={<TransferredPage />}
+                  />
+                  <Route path="account" element={<AccountPage />} />
+                  <Route path="account/edit" element={<EditDetailsPage />} />
+                  <Route path="search" element={<SearchPage />} />
+                </Route>
+              </Routes>
+            </HashRouter>
+          </AdminAuthProvider>
+        </UserProfileProvider>
       </WatchlistProvider>
     </CatalogProvider>
   );

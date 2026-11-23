@@ -82,7 +82,11 @@ export default function ImageField({ value, onChange, label = 'Image' }) {
                   value === img.url ? 'border-[#0F172A]' : 'border-transparent'
                 }`}
               >
-                <img src={img.url} alt="" className="aspect-square w-full object-cover" />
+                <img
+                  src={img.url}
+                  alt=""
+                  className="aspect-square w-full bg-[#F1F5F9] object-contain object-center"
+                />
               </button>
             ))
           )}
@@ -93,7 +97,7 @@ export default function ImageField({ value, onChange, label = 'Image' }) {
         <img
           src={value}
           alt=""
-          className="mt-3 h-28 w-full rounded-md object-cover"
+          className="mt-3 h-36 w-full rounded-md bg-[#F1F5F9] object-contain object-center"
         />
       ) : null}
       {busy ? (

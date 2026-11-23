@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { Bookmark, Ticket, User } from 'lucide-react';
+import { useUserProfile } from '../../context/UserProfileContext';
 
 function HomeIcon({ active }) {
   return (
@@ -23,17 +24,19 @@ const items = [
   { to: '/', label: 'Home', icon: 'home', end: true },
   { to: '/watchlist', label: 'Watchlist', icon: Bookmark },
   { to: '/my-tickets', label: 'My Tickets', icon: Ticket },
-  { to: '/account', label: 'Account', icon: User },
+  { to: '/account', label: 'Account', icon: User, badgeKey: 'inbox' },
 ];
 
 export default function BottomNav() {
+  const { inboxCount } = useUserProfile();
+
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-[#303030] bg-[#111111] pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-[#303030] bg-[#000000] pb-[env(safe-area-inset-bottom)] md:hidden"
       aria-label="Primary"
     >
       <ul className="grid h-[58px] grid-cols-4">
-        {items.map(({ to, label, icon: Icon, end }) => (
+        {items.map(({ to, label, icon: Icon, end, badgeKey }) => (
           <li key={to} className="relative">
             <NavLink
               to={to}
@@ -48,16 +51,29 @@ export default function BottomNav() {
                   {Icon === 'home' ? (
                     <HomeIcon active={isActive} />
                   ) : (
-                    <Icon
-                      className={`h-5 w-5 ${
-                        isActive ? 'text-[#075BE8]' : 'text-white'
-                      }`}
-                      strokeWidth={1.75}
-                    />
+                    <span className="relative">
+                      {isActive && label === 'Account' ? (
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#075BE8]">
+                          <Icon className="h-4 w-4 text-white" strokeWidth={2} />
+                        </span>
+                      ) : (
+                        <Icon
+                          className={`h-5 w-5 ${
+                            isActive ? 'text-[#075BE8]' : 'text-white'
+                          }`}
+                          strokeWidth={1.75}
+                        />
+                      )}
+                      {badgeKey === 'inbox' && inboxCount > 0 ? (
+                        <span className="absolute -right-2.5 -top-1.5 inline-flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-[#FF3B30] px-1 text-[9px] font-bold leading-none text-white">
+                          {inboxCount}
+                        </span>
+                      ) : null}
+                    </span>
                   )}
                   <span
                     className={
-                      isActive ? 'font-semibold text-[#075BE8]' : 'text-white'
+                      isActive ? 'font-semibold text-white' : 'text-white'
                     }
                   >
                     {label}

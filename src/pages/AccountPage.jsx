@@ -1,6 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, ChevronRight, Shield, User } from 'lucide-react';
+import {
+  Bell,
+  ChevronRight,
+  CreditCard,
+  Heart,
+  HelpCircle,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Navigation,
+  Shield,
+  ShieldCheck,
+  UserRoundPen,
+} from 'lucide-react';
+import { useUserProfile } from '../context/UserProfileContext';
 import {
   getPushPermission,
   pushSupported,
@@ -8,162 +22,223 @@ import {
   unsubscribeFromPush,
 } from '../pwa/push';
 
-const rows = [
-  'My Account',
-  'Purchase History',
-  'Payment Methods',
-  'Help & Support',
-];
+function Section({ title, children }) {
+  return (
+    <section className="mb-7">
+      <h2 className="mb-2.5 px-1 text-[17px] font-bold text-white">{title}</h2>
+      <ul className="overflow-hidden rounded-2xl bg-[#1C1C1E]">{children}</ul>
+    </section>
+  );
+}
+
+function Row({
+  icon: Icon,
+  label,
+  to,
+  badge,
+  divider = true,
+  trailing,
+  onClick,
+}) {
+  const content = (
+    <>
+      <span className="flex min-w-0 flex-1 items-center gap-3.5">
+        <Icon className="h-[22px] w-[22px] shrink-0 text-[#C7C7CC]" strokeWidth={1.75} />
+        <span className="truncate text-[16px] text-white">{label}</span>
+        {badge != null && badge > 0 ? (
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FF3B30] px-1.5 text-[11px] font-bold leading-none text-white">
+            {badge}
+          </span>
+        ) : null}
+      </span>
+      {trailing || (
+        <ChevronRight className="h-5 w-5 shrink-0 text-[#636366]" strokeWidth={2} />
+      )}
+    </>
+  );
+
+  const className = `flex w-full items-center justify-between px-4 py-[14px] text-left ${
+    divider ? 'border-b border-[#2C2C2E]' : ''
+  }`;
+
+  if (to) {
+    return (
+      <li>
+        <Link to={to} className={className}>
+          {content}
+        </Link>
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      <button type="button" onClick={onClick} className={className}>
+        {content}
+      </button>
+    </li>
+  );
+}
+
+function Toggle({ checked, onChange, disabled }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={`relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50 ${
+        checked ? 'bg-[#075BE8]' : 'bg-[#39393D]'
+      }`}
+    >
+      <span
+        className={`absolute top-[2px] left-0 h-[27px] w-[27px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.35)] transition-transform duration-200 ease-out ${
+          checked ? 'translate-x-[22px]' : 'translate-x-[2px]'
+        }`}
+      />
+    </button>
+  );
+}
 
 export default function AccountPage() {
-  const [pushStatus, setPushStatus] = useState('loading');
+  const {
+    name,
+    email,
+    initials,
+    hasDetails,
+    locationContent,
+    notifications,
+    inboxCount,
+    updateProfile,
+  } = useUserProfile();
   const [pushBusy, setPushBusy] = useState(false);
-  const [pushMessage, setPushMessage] = useState('');
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      if (!pushSupported()) {
-        if (!cancelled) setPushStatus('unsupported');
-        return;
-      }
+    async function syncPush() {
+      if (!pushSupported()) return;
       const permission = await getPushPermission();
-      if (!cancelled) setPushStatus(permission);
+      if (cancelled) return;
+      if (permission === 'granted' && !notifications) {
+        updateProfile({ notifications: true });
+      }
     }
-    load();
+    syncPush();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [notifications, updateProfile]);
 
-  const enablePush = async () => {
+  const onToggleLocation = (next) => {
+    updateProfile({ locationContent: next });
+  };
+
+  const onToggleNotifications = async (next) => {
+    updateProfile({ notifications: next });
+    if (!pushSupported()) return;
     setPushBusy(true);
-    setPushMessage('');
     try {
-      const result = await subscribeToPush();
-      if (result.ok) {
-        setPushStatus('granted');
-        setPushMessage(
-          'Notifications enabled for booking updates and event reminders.',
-        );
-      } else if (result.reason === 'denied') {
-        setPushStatus('denied');
-        setPushMessage(
-          'Permission denied. Enable notifications in your browser settings.',
-        );
+      if (next) {
+        const result = await subscribeToPush();
+        if (!result.ok && result.reason === 'denied') {
+          updateProfile({ notifications: false });
+        }
+      } else {
+        await unsubscribeFromPush();
       }
-    } catch (err) {
-      setPushMessage(err.message || 'Could not enable notifications.');
+    } catch {
+      /* keep local preference */
     } finally {
       setPushBusy(false);
     }
   };
 
-  const disablePush = async () => {
-    setPushBusy(true);
-    setPushMessage('');
-    try {
-      await unsubscribeFromPush();
-      setPushStatus('default');
-      setPushMessage('Notifications turned off on this device.');
-    } catch (err) {
-      setPushMessage(err.message || 'Could not disable notifications.');
-    } finally {
-      setPushBusy(false);
-    }
-  };
+  const displayName = hasDetails ? name || 'Account' : 'Guest User';
+  const displayEmail = hasDetails
+    ? email || 'Add your email in Edit Details'
+    : 'Tap Edit Details to add your name & email';
 
   return (
-    <div className="px-4 py-4 md:px-6 lg:px-8">
-      <h1 className="mb-5 text-xl font-bold text-white">Account</h1>
-
-      <div className="mb-6 flex items-center gap-3 rounded-[6px] border border-[#303030] bg-[#242424] p-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#171717]">
-          <User className="h-6 w-6 text-[#A0A0A0]" />
-        </div>
-        <div>
-          <p className="font-semibold text-white">Guest User</p>
-          <p className="text-sm text-[#A0A0A0]">Sign in to sync your tickets</p>
-        </div>
-      </div>
-
-      <ul className="overflow-hidden rounded-[6px] border border-[#303030] bg-[#242424]">
-        {rows.map((label, i) => (
-          <li key={label}>
-            <button
-              type="button"
-              className={`flex w-full items-center justify-between px-4 py-3.5 text-left text-sm text-white hover:bg-[#2a2a2a] ${
-                i > 0 ? 'border-t border-[#303030]' : ''
-              }`}
-            >
-              {label}
-              <ChevronRight className="h-4 w-4 text-[#A0A0A0]" />
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-4 rounded-[6px] border border-[#303030] bg-[#242424] p-4">
-        <div className="flex items-start gap-3">
-          <Bell className="mt-0.5 h-5 w-5 shrink-0 text-[#A0A0A0]" />
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-white">Push notifications</p>
-            <p className="mt-1 text-[13px] leading-snug text-[#A0A0A0]">
-              Opt in for booking confirmations, upcoming-event reminders, and
-              important ticket updates. We only subscribe after you allow
-              permission.
-            </p>
-            {pushStatus === 'unsupported' ? (
-              <p className="mt-2 text-[12px] text-[#A0A0A0]">
-                Not supported in this browser. On iPhone, install to Home Screen
-                first (iOS 16.4+).
-              </p>
-            ) : null}
-            {pushMessage ? (
-              <p className="mt-2 text-[12px] text-[#A0A0A0]">{pushMessage}</p>
-            ) : null}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {pushStatus !== 'granted' ? (
-                <button
-                  type="button"
-                  disabled={pushBusy || pushStatus === 'unsupported'}
-                  onClick={enablePush}
-                  className="rounded-md bg-[#075BE8] px-3 py-2 text-[13px] font-bold text-white disabled:opacity-50"
-                >
-                  {pushBusy ? 'Working…' : 'Enable notifications'}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  disabled={pushBusy}
-                  onClick={disablePush}
-                  className="rounded-md border border-[#303030] px-3 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
-                >
-                  {pushBusy ? 'Working…' : 'Turn off'}
-                </button>
-              )}
-            </div>
+    <div className="min-h-[100dvh] bg-[#000000] px-4 pb-8 pt-5 md:px-6 lg:px-8">
+      {/* Profile header */}
+      <div className="mb-8 flex items-center gap-4">
+        <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-[#075BE8] p-[3px]">
+          <div className="flex h-full w-full items-center justify-center rounded-full bg-[#1C1C1E]">
+            <span className="text-[22px] font-bold tracking-wide text-white">
+              {hasDetails ? initials : '?'}
+            </span>
           </div>
         </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[26px] font-bold leading-tight tracking-tight text-white">
+            {displayName}
+          </p>
+          <p className="mt-0.5 truncate text-[14px] text-[#8E8E93]">{displayEmail}</p>
+        </div>
       </div>
 
-      <Link
-        to="/admin/login"
-        className="mt-4 flex w-full items-center justify-between rounded-[6px] border border-[#303030] bg-[#242424] px-4 py-3.5 text-sm text-white hover:bg-[#2a2a2a]"
-      >
-        <span className="flex items-center gap-2 font-semibold">
-          <Shield className="h-4 w-4 text-[#A0A0A0]" />
-          Admin Console
-        </span>
-        <ChevronRight className="h-4 w-4 text-[#A0A0A0]" />
-      </Link>
+      <Section title="Personalization">
+        <Row icon={Mail} label="My Inbox" badge={inboxCount} />
+        <Row icon={Heart} label="Favorites" to="/watchlist" />
+        <Row icon={MapPin} label="Location" divider={false} />
+      </Section>
 
-      <button
-        type="button"
-        className="mt-6 w-full rounded-md border border-[#303030] py-3 text-sm font-semibold text-white hover:bg-[#171717]"
-      >
-        Sign In
-      </button>
+      <Section title="Permissions">
+        <Row
+          icon={Navigation}
+          label="Location Content"
+          trailing={
+            <Toggle checked={locationContent} onChange={onToggleLocation} />
+          }
+        />
+        <Row
+          icon={Bell}
+          label="Notifications"
+          divider={false}
+          trailing={
+            <Toggle
+              checked={notifications}
+              onChange={onToggleNotifications}
+              disabled={pushBusy}
+            />
+          }
+        />
+      </Section>
+
+      <Section title="Account">
+        <Row icon={UserRoundPen} label="Edit Details" to="/account/edit" />
+        <Row icon={ShieldCheck} label="Security" />
+        <Row
+          icon={CreditCard}
+          label="Saved Payment Methods"
+          divider={false}
+        />
+      </Section>
+
+      <Section title="Help & Guidance">
+        <Row icon={HelpCircle} label="Need Help?" />
+        <Row icon={MessageSquare} label="Give Us Feedback" divider={false} />
+      </Section>
+
+      <div className="mb-2 overflow-hidden rounded-2xl bg-[#1C1C1E]">
+        <Link
+          to="/admin/login"
+          className="flex w-full items-center justify-between px-4 py-[14px] text-left"
+        >
+          <span className="flex min-w-0 flex-1 items-center gap-3.5">
+            <Shield
+              className="h-[22px] w-[22px] shrink-0 text-[#C7C7CC]"
+              strokeWidth={1.75}
+            />
+            <span className="truncate text-[16px] text-white">Admin Console</span>
+          </span>
+          <ChevronRight
+            className="h-5 w-5 shrink-0 text-[#636366]"
+            strokeWidth={2}
+          />
+        </Link>
+      </div>
     </div>
   );
 }

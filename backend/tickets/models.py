@@ -22,6 +22,24 @@ class TicketOrder(models.Model):
     order_number = models.CharField(max_length=64, blank=True)
     map_query = models.CharField(max_length=255, blank=True)
     map_embed = models.CharField(max_length=1000, blank=True)
+    entry_info = models.CharField(max_length=120, blank=True, default='Mobile Ticket')
+    ticket_info_note = models.CharField(
+        max_length=255,
+        blank=True,
+        default='NO PROF CAMS VID/AUD REC',
+    )
+    city = models.CharField(max_length=120, blank=True)
+    entrance = models.CharField(max_length=120, blank=True)
+    purchase_date = models.CharField(max_length=120, blank=True)
+    face_value = models.CharField(max_length=32, blank=True, default='200.00')
+    grand_total = models.CharField(max_length=32, blank=True, default='216.44')
+    ticket_type = models.CharField(
+        max_length=120,
+        blank=True,
+        default='Verified Fan Presale',
+    )
+    barcode = models.CharField(max_length=64, blank=True)
+    terms = models.TextField(blank=True)
     bucket = models.CharField(
         max_length=16,
         choices=BUCKET_CHOICES,

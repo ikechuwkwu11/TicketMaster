@@ -11,7 +11,7 @@ export default function TicketCard({ ticket }) {
         <img
           src={ticket.image}
           alt={ticket.title}
-          className="h-full w-full object-cover"
+          className="h-full w-full bg-[#111] object-contain object-center"
           loading="lazy"
         />
         {/* Date badge — flush bottom-left, sharp corners like reference */}

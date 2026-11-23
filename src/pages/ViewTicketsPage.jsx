@@ -106,7 +106,7 @@ export default function ViewTicketsPage() {
           <img
             src={ticket.image}
             alt={ticket.title}
-            className="h-full w-full object-cover object-top"
+            className="h-full w-full object-contain object-center bg-[#111]"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
 
@@ -274,7 +274,7 @@ export default function ViewTicketsPage() {
                     <img
                       src={ticket.image}
                       alt=""
-                      className="aspect-[3/4] w-full object-cover"
+                      className="aspect-[3/4] w-full bg-[#111] object-contain object-center"
                     />
                     <div className="bg-black px-2.5 py-2.5">
                       <p className="text-[9px] font-semibold uppercase tracking-wide text-white">

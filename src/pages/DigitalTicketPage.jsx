@@ -114,6 +114,11 @@ export default function DigitalTicketPage() {
           <AppleWalletButton />
           <button
             type="button"
+            onClick={() => {
+              const seat = seats[index];
+              const q = seat?.id ? `?seat=${encodeURIComponent(seat.id)}` : '';
+              navigate(`/my-tickets/${ticket.slug}/details${q}`);
+            }}
             className="inline-flex items-center gap-2 rounded-full border border-black bg-white px-4 py-2.5 text-[13px] font-semibold text-black"
           >
             <Info className="h-4 w-4" strokeWidth={2.25} />

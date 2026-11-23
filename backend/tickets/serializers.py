@@ -50,6 +50,36 @@ class TicketOrderSerializer(serializers.ModelSerializer):
         required=False,
         allow_blank=True,
     )
+    entryInfo = serializers.CharField(
+        source='entry_info',
+        required=False,
+        allow_blank=True,
+    )
+    ticketInfoNote = serializers.CharField(
+        source='ticket_info_note',
+        required=False,
+        allow_blank=True,
+    )
+    purchaseDate = serializers.CharField(
+        source='purchase_date',
+        required=False,
+        allow_blank=True,
+    )
+    faceValue = serializers.CharField(
+        source='face_value',
+        required=False,
+        allow_blank=True,
+    )
+    grandTotal = serializers.CharField(
+        source='grand_total',
+        required=False,
+        allow_blank=True,
+    )
+    ticketType = serializers.CharField(
+        source='ticket_type',
+        required=False,
+        allow_blank=True,
+    )
     seats = SeatSerializer(many=True, required=False)
     quantity = serializers.IntegerField(read_only=True)
 
@@ -67,6 +97,16 @@ class TicketOrderSerializer(serializers.ModelSerializer):
             'orderNumber',
             'mapQuery',
             'mapEmbed',
+            'entryInfo',
+            'ticketInfoNote',
+            'city',
+            'entrance',
+            'purchaseDate',
+            'faceValue',
+            'grandTotal',
+            'ticketType',
+            'barcode',
+            'terms',
             'bucket',
             'quantity',
             'seats',

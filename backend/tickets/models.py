@@ -40,6 +40,9 @@ class TicketOrder(models.Model):
     )
     barcode = models.CharField(max_length=64, blank=True)
     terms = models.TextField(blank=True)
+    recipient_name = models.CharField(max_length=255, blank=True)
+    recipient_email = models.EmailField(blank=True)
+    transfer_from_name = models.CharField(max_length=255, blank=True)
     bucket = models.CharField(
         max_length=16,
         choices=BUCKET_CHOICES,

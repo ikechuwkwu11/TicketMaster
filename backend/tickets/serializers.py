@@ -80,6 +80,21 @@ class TicketOrderSerializer(serializers.ModelSerializer):
         required=False,
         allow_blank=True,
     )
+    recipientName = serializers.CharField(
+        source='recipient_name',
+        required=False,
+        allow_blank=True,
+    )
+    recipientEmail = serializers.EmailField(
+        source='recipient_email',
+        required=False,
+        allow_blank=True,
+    )
+    transferFromName = serializers.CharField(
+        source='transfer_from_name',
+        required=False,
+        allow_blank=True,
+    )
     seats = SeatSerializer(many=True, required=False)
     quantity = serializers.IntegerField(read_only=True)
 
@@ -107,6 +122,9 @@ class TicketOrderSerializer(serializers.ModelSerializer):
             'ticketType',
             'barcode',
             'terms',
+            'recipientName',
+            'recipientEmail',
+            'transferFromName',
             'bucket',
             'quantity',
             'seats',

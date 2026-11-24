@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Send, Shield, Ticket, UserRoundPlus } from 'lucide-react';
+import { api } from '../../api/client';
+import { useUserProfile } from '../../context/UserProfileContext';
 
 function SelectStep({
   seats,
@@ -153,7 +155,7 @@ function RecipientStep({ onBack, onSelectContacts, onManualEntry }) {
   );
 }
 
-function DetailsStep({ selectedCount, onBack, onSubmit }) {
+function DetailsStep({ selectedCount, onBack, onSubmit, busy = false }) {
   const [useMobile, setUseMobile] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
@@ -304,17 +306,29 @@ function DetailsStep({ selectedCount, onBack, onSubmit }) {
         </button>
         <button
           type="button"
-          onClick={() =>
+          disabled={busy}
+          onClick={() => {
+            if (!useMobile && !form.email.trim()) {
+              alert('Enter the recipient email so we can send the transfer email.');
+              return;
+            }
+            if (!form.firstName.trim() || !form.lastName.trim()) {
+              alert('Enter the recipient first and last name.');
+              return;
+            }
             onSubmit({
               ...form,
-              email: useMobile ? '' : form.email,
+              email: useMobile ? '' : form.email.trim(),
               mobile: useMobile ? form.mobile : '',
-            })
-          }
-          className="rounded-md bg-[#1A1A1A] px-5 py-3 text-[14px] font-bold text-white"
+            });
+          }}
+          className="rounded-md bg-[#1A1A1A] px-5 py-3 text-[14px] font-bold text-white disabled:opacity-60"
         >
-          Transfer {selectedCount}{' '}
-          {selectedCount === 1 ? 'Ticket' : 'Tickets'}
+          {busy
+            ? 'Sending email…'
+            : `Transfer ${selectedCount} ${
+                selectedCount === 1 ? 'Ticket' : 'Tickets'
+              }`}
         </button>
       </div>
     </>
@@ -323,11 +337,13 @@ function DetailsStep({ selectedCount, onBack, onSubmit }) {
 
 export default function TransferTicketsSheet({ ticket, onClose }) {
   const navigate = useNavigate();
+  const { name: profileName } = useUserProfile();
   const seats = ticket?.seats ?? [];
   const [step, setStep] = useState('select'); // select | recipient | details
   const [selected, setSelected] = useState(() =>
     seats[0]?.id ? [seats[0].id] : [],
   );
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -400,14 +416,72 @@ export default function TransferTicketsSheet({ ticket, onClose }) {
         {step === 'details' && (
           <DetailsStep
             selectedCount={selectedCount}
+            busy={sending}
             onBack={() => setStep('recipient')}
-            onSubmit={(form) => {
+            onSubmit={async (form) => {
               if (typeof navigator !== 'undefined' && !navigator.onLine) {
                 alert(
                   'Transfers need an internet connection. You can still browse your tickets offline.',
                 );
                 return;
               }
+
+              const selectedSeats = seats.filter((s) => selected.includes(s.id));
+              const recipientEmail = (form.email || '').trim();
+              const fromName =
+                profileName ||
+                `${form.firstName || ''} ${form.lastName || ''}`.trim();
+
+              if (!recipientEmail) {
+                alert(
+                  'Email is required so the recipient gets the Ticketmaster transfer email.',
+                );
+                return;
+              }
+
+              const absoluteImage = (() => {
+                const src = ticket.image || '';
+                if (!src) return '';
+                if (
+                  src.startsWith('http://') ||
+                  src.startsWith('https://') ||
+                  src.startsWith('data:')
+                ) {
+                  return src;
+                }
+                try {
+                  return new URL(src, window.location.href).href;
+                } catch {
+                  return src;
+                }
+              })();
+
+              setSending(true);
+              try {
+                await api.sendTransferEmail({
+                  to: recipientEmail,
+                  fromName: profileName || '',
+                  ticket: {
+                    ...ticket,
+                    image: absoluteImage || ticket.image,
+                    seats: selectedSeats,
+                    quantity: selectedSeats.length,
+                    recipientName: `${form.firstName} ${form.lastName}`.trim(),
+                    recipientEmail,
+                    transferFromName: profileName || '',
+                  },
+                });
+              } catch (err) {
+                alert(
+                  err.message ||
+                    'Could not send the transfer email. Keep Django running on your PC, then try again.',
+                );
+                setSending(false);
+                return;
+              } finally {
+                setSending(false);
+              }
+
               onClose();
               navigate(`/my-tickets/${ticket.slug}/transferred`, {
                 state: {
@@ -418,6 +492,7 @@ export default function TransferTicketsSheet({ ticket, onClose }) {
                   email: form.email,
                   mobile: form.mobile,
                   note: form.note,
+                  fromName,
                 },
               });
             }}

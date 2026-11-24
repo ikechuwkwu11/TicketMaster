@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
+import { api } from '../../api/client';
 import { useCatalog, uid } from '../../context/CatalogContext';
 import ImageField from '../components/ImageField';
 
@@ -35,6 +36,9 @@ const emptyTicket = {
   ticketType: 'Verified Fan Presale',
   barcode: '',
   terms: '',
+  recipientName: '',
+  recipientEmail: '',
+  transferFromName: '',
   seats: [blankSeat()],
 };
 
@@ -75,6 +79,8 @@ export default function AdminTicketForm() {
     startSeat: '1',
     count: '4',
   });
+  const [sendTransferEmail, setSendTransferEmail] = useState(true);
+  const [emailBusy, setEmailBusy] = useState(false);
 
   const update = (key) => (e) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -126,26 +132,65 @@ export default function AdminTicketForm() {
     const displayTitle = form.displayTitle.trim() || form.title.trim();
     const title = form.title.trim() || displayTitle.toUpperCase();
 
+    const payload = {
+      ...form,
+      id: form.id || found?.ticket?.id,
+      title,
+      displayTitle,
+      slug: form.slug.trim() || slugify(displayTitle),
+      venueShort: form.venueShort.trim() || form.venue.trim(),
+      mapQuery: form.mapQuery.trim() || form.venue.trim(),
+      recipientName: form.recipientName.trim(),
+      recipientEmail: form.recipientEmail.trim(),
+      transferFromName: form.transferFromName.trim(),
+      seats: form.seats.map((s) => ({
+        ...s,
+        section: String(s.section),
+        row: String(s.row),
+        seat: String(s.seat),
+        type: s.type || form.ticketType || 'Verified Fan Presale',
+      })),
+    };
+
     try {
-      await saveTicket(
-        {
-          ...form,
-          id: form.id || found?.ticket?.id,
-          title,
-          displayTitle,
-          slug: form.slug.trim() || slugify(displayTitle),
-          venueShort: form.venueShort.trim() || form.venue.trim(),
-          mapQuery: form.mapQuery.trim() || form.venue.trim(),
-          seats: form.seats.map((s) => ({
-            ...s,
-            section: String(s.section),
-            row: String(s.row),
-            seat: String(s.seat),
-            type: s.type || form.ticketType || 'Verified Fan Presale',
-          })),
-        },
-        { bucket },
-      );
+      await saveTicket(payload, { bucket });
+
+      if (sendTransferEmail && payload.recipientEmail) {
+        setEmailBusy(true);
+        try {
+          const image = (() => {
+            const src = payload.image || '';
+            if (
+              !src ||
+              src.startsWith('http://') ||
+              src.startsWith('https://') ||
+              src.startsWith('data:')
+            ) {
+              return src;
+            }
+            try {
+              return new URL(src, window.location.href).href;
+            } catch {
+              return src;
+            }
+          })();
+          await api.sendTransferEmail({
+            to: payload.recipientEmail,
+            fromName: payload.transferFromName,
+            ticket: { ...payload, image },
+          });
+          alert(`Ticket saved. Transfer email sent to ${payload.recipientEmail}.`);
+        } catch (mailErr) {
+          alert(
+            `Ticket saved, but email failed: ${
+              mailErr.message || 'Could not send transfer email'
+            }. Make sure the Django backend is running and EMAIL_HOST_PASSWORD is set.`,
+          );
+        } finally {
+          setEmailBusy(false);
+        }
+      }
+
       navigate(`/admin/tickets?tab=${bucket}`);
     } catch (err) {
       alert(err.message || 'Failed to save ticket');
@@ -235,6 +280,55 @@ export default function AdminTicketForm() {
           <span className="text-[12px] font-bold text-[#334155]">Map embed URL</span>
           <input value={form.mapEmbed} onChange={update('mapEmbed')} className={field} />
         </label>
+
+        <div className="rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] p-4">
+          <h2 className="text-[14px] font-bold text-[#0F172A]">Transfer email</h2>
+          <p className="mt-1 text-[12px] text-[#64748B]">
+            When you book for a user, this sends the Ticketmaster-style “ready to
+            accept” email from Xptraveler78@gmail.com using this ticket’s title,
+            date, venue, seats, and image.
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="block sm:col-span-2">
+              <span className="text-[12px] font-bold text-[#334155]">
+                Transfer from name (shown in subject/title)
+              </span>
+              <input
+                value={form.transferFromName}
+                onChange={update('transferFromName')}
+                placeholder="Optional — leave blank for “From -”"
+                className={field}
+              />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Recipient name</span>
+              <input
+                value={form.recipientName}
+                onChange={update('recipientName')}
+                className={field}
+              />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-bold text-[#334155]">Recipient email</span>
+              <input
+                type="email"
+                value={form.recipientEmail}
+                onChange={update('recipientEmail')}
+                placeholder="user@gmail.com"
+                className={field}
+              />
+            </label>
+          </div>
+          <label className="mt-3 flex items-center gap-2 text-[13px] font-semibold text-[#0F172A]">
+            <input
+              type="checkbox"
+              checked={sendTransferEmail}
+              onChange={(e) => setSendTransferEmail(e.target.checked)}
+              className="h-4 w-4 accent-[#075BE8]"
+            />
+            Send transfer email on save
+          </label>
+        </div>
 
         <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4">
           <h2 className="text-[14px] font-bold text-[#0F172A]">Ticket Details page</h2>
@@ -405,9 +499,10 @@ export default function AdminTicketForm() {
           </Link>
           <button
             type="submit"
-            className="rounded-md bg-[#0F172A] px-5 py-2.5 text-[13px] font-bold text-white"
+            disabled={emailBusy}
+            className="rounded-md bg-[#0F172A] px-5 py-2.5 text-[13px] font-bold text-white disabled:opacity-60"
           >
-            Save ticket order
+            {emailBusy ? 'Sending email…' : 'Save ticket order'}
           </button>
         </div>
       </form>

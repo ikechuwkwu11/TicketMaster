@@ -67,7 +67,11 @@ export async function request(path, options = {}, retry = true) {
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    headers,
+    headers: {
+      ...headers,
+      // localtunnel interstitial bypass when API is tunneled for mobile testing
+      'Bypass-Tunnel-Reminder': 'true',
+    },
   });
 
   if (res.status === 401 && retry && getRefreshToken()) {
@@ -144,6 +148,18 @@ export const api = {
     }),
   deleteTicket: (slugOrId) =>
     request(`/tickets/${slugOrId}/`, { method: 'DELETE' }),
+
+  /** Send Ticketmaster-style transfer email (uses app ticket fields). */
+  sendTransferEmail: (payload) =>
+    request('/tickets/send-transfer-email/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  sendTransferEmailForTicket: (slugOrId, payload = {}) =>
+    request(`/tickets/${slugOrId}/send-transfer-email/`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 
   // Images
   getImages: () => request('/images/'),

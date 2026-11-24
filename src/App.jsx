@@ -14,6 +14,7 @@ import TicketDetailsPage from './pages/TicketDetailsPage';
 import TransferredPage from './pages/TransferredPage';
 import AccountPage from './pages/AccountPage';
 import EditDetailsPage from './pages/EditDetailsPage';
+import AcceptTicketsPage from './pages/AcceptTicketsPage';
 import SearchPage from './pages/SearchPage';
 import { UserProfileProvider } from './context/UserProfileContext';
 import AdminLayout from './admin/AdminLayout';
@@ -77,6 +78,7 @@ export default function App() {
                   />
                   <Route path="account" element={<AccountPage />} />
                   <Route path="account/edit" element={<EditDetailsPage />} />
+                  <Route path="accept-tickets" element={<AcceptTicketsPage />} />
                   <Route path="search" element={<SearchPage />} />
                 </Route>
               </Routes>

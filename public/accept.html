@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#026CDF" />
+    <title>Unable to Accept Tickets — Ticketmaster</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f5f5f5;
+        color: #111;
+        min-height: 100vh;
+        padding: 40px 16px 48px;
+      }
+      .wrap {
+        max-width: 420px;
+        margin: 0 auto;
+      }
+      .logo {
+        display: inline-block;
+        background: #026cdf;
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: -0.2px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin: 0 auto 24px;
+      }
+      .logo-wrap {
+        text-align: center;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        padding: 24px 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+      .icon {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+      }
+      h1 {
+        margin: 0;
+        text-align: center;
+        font-size: 22px;
+        line-height: 1.25;
+        font-weight: 800;
+      }
+      p {
+        margin: 12px 0 0;
+        text-align: center;
+        font-size: 15px;
+        line-height: 1.5;
+        color: #555;
+      }
+      .err {
+        margin-top: 20px;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+        padding: 12px 14px;
+        border-radius: 8px;
+      }
+      a.btn {
+        display: block;
+        margin-top: 24px;
+        background: #026cdf;
+        color: #fff !important;
+        text-decoration: none;
+        text-align: center;
+        font-size: 15px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        padding: 14px 16px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="logo-wrap"><span class="logo">ticketmaster</span></div>
+      <div class="card">
+        <div class="icon" aria-hidden="true">!</div>
+        <h1>Unable to Accept Tickets</h1>
+        <p id="msg">
+          Something went wrong while accepting this transfer. Please try again
+          later or contact Ticketmaster support.
+        </p>
+        <div class="err">Error: Transfer could not be completed.</div>
+        <a class="btn" href="./#/my-tickets">Back to My Tickets</a>
+      </div>
+    </div>
+    <script>
+      (function () {
+        try {
+          var params = new URLSearchParams(window.location.search || '');
+          var eventName = params.get('event');
+          if (eventName) {
+            document.getElementById('msg').textContent =
+              'Something went wrong while accepting this transfer for ' +
+              eventName +
+              '. Please try again later or contact Ticketmaster support.';
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </body>
+</html>

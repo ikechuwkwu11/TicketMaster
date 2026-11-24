@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Ticket Transfer Is Ready To Be Accepted!</title>
+</head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;">
+    <tr>
+      <td align="center" style="padding:0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background:#026CDF;padding:18px 16px;">
+              <span style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;font-family:Arial,Helvetica,sans-serif;">ticketmaster</span>
+            </td>
+          </tr>
+
+          <!-- Title -->
+          <tr>
+            <td style="padding:28px 20px 18px;text-align:center;">
+              <h1 style="margin:0;font-size:22px;line-height:1.3;font-weight:700;color:#2A2A2A;">
+                Your Ticket Transfer From{% if from_name %} {{ from_name }}{% else %} -{% endif %} Is Ready To Be Accepted!
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Progress -->
+          <tr>
+            <td style="padding:8px 24px 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" width="33%" valign="top" style="width:33%;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                      <tr>
+                        <td align="center" style="width:44px;height:44px;border-radius:22px;background:#026CDF;color:#ffffff;font-size:18px;line-height:44px;">
+                          &#128241;
+                        </td>
+                      </tr>
+                    </table>
+                    <div style="margin-top:8px;font-size:13px;font-weight:700;color:#026CDF;">Received</div>
+                  </td>
+                  <td align="center" width="33%" valign="top" style="width:33%;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                      <tr>
+                        <td align="center" style="width:44px;height:44px;border-radius:22px;border:2px solid #C8C8C8;background:#ffffff;color:#8A8A8A;font-size:18px;line-height:40px;">
+                          &#10003;
+                        </td>
+                      </tr>
+                    </table>
+                    <div style="margin-top:8px;font-size:13px;font-weight:600;color:#8A8A8A;">Accepted</div>
+                  </td>
+                  <td align="center" width="33%" valign="top" style="width:33%;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                      <tr>
+                        <td align="center" style="width:44px;height:44px;border-radius:22px;border:2px solid #C8C8C8;background:#ffffff;color:#8A8A8A;font-size:16px;line-height:40px;">
+                          &#127915;
+                        </td>
+                      </tr>
+                    </table>
+                    <div style="margin-top:8px;font-size:13px;font-weight:600;color:#8A8A8A;">Complete</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3" style="padding-top:6px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="width:16.5%;"></td>
+                        <td style="width:33%;height:3px;background:#026CDF;font-size:0;line-height:0;">&nbsp;</td>
+                        <td style="width:33%;height:3px;background:#D0D0D0;font-size:0;line-height:0;">&nbsp;</td>
+                        <td style="width:16.5%;"></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Event card -->
+          <tr>
+            <td style="padding:0 16px 20px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #D8D8D8;border-radius:4px;">
+                <tr>
+                  <td style="padding:16px 16px 12px;">
+                    <div style="font-size:18px;font-weight:700;color:#111111;line-height:1.25;">{{ event_title }}</div>
+                    <div style="margin-top:8px;font-size:14px;color:#6B6B6B;line-height:1.4;">{{ date_label }}</div>
+                    <div style="margin-top:2px;font-size:14px;color:#6B6B6B;line-height:1.4;">{{ venue }}</div>
+                    <div style="margin-top:10px;font-size:15px;font-weight:700;color:#111111;line-height:1.35;">{{ seat_label }}</div>
+                  </td>
+                </tr>
+                {% if has_image and image_url %}
+                <tr>
+                  <td style="padding:0 16px 16px;">
+                    <img
+                      src="{{ image_url }}"
+                      alt=""
+                      width="552"
+                      border="0"
+                      style="display:block;width:100%;max-width:552px;height:auto;border:0;border-radius:2px;outline:none;text-decoration:none;"
+                    />
+                  </td>
+                </tr>
+                {% endif %}
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA: bulletproof button — absolute https URL, no #fragment -->
+          <tr>
+            <td style="padding:8px 16px 18px;" align="center">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" bgcolor="#026CDF" style="background-color:#026CDF;border-radius:4px;mso-padding-alt:16px 32px;">
+                          <!--[if mso]>
+                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ accept_url }}" style="height:52px;v-text-anchor:middle;width:280px;" arcsize="8%" stroke="f" fillcolor="#026CDF">
+                            <w:anchorlock/>
+                            <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">ACCEPT TICKETS</center>
+                          </v:roundrect>
+                          <![endif]-->
+                          <!--[if !mso]><!-- -->
+                          <a
+                            href="{{ accept_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style="background-color:#026CDF;border:1px solid #026CDF;border-radius:4px;color:#ffffff;display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;letter-spacing:0.4px;line-height:1.2;padding:16px 40px;text-align:center;text-decoration:none;text-transform:uppercase;-webkit-text-size-adjust:none;mso-hide:all;"
+                          >ACCEPT TICKETS</a>
+                          <!--<![endif]-->
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:14px 0 0;font-size:13px;line-height:1.4;color:#026CDF;text-align:center;">
+                <a href="{{ accept_url }}" target="_blank" rel="noopener noreferrer" style="color:#026CDF;font-weight:700;text-decoration:underline;">
+                  Tap here to accept tickets
+                </a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Legal -->
+          <tr>
+            <td style="padding:0 20px 18px;text-align:center;">
+              <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#6B6B6B;">
+                By accepting these tickets, you agree to Ticketmaster's
+                <a href="https://www.ticketmaster.com/h/terms.html" style="color:#026CDF;text-decoration:underline;">Terms of Use</a>.
+              </p>
+              <p style="margin:0 0 12px;font-size:12px;line-height:1.45;color:#6B6B6B;">
+                If the tickets were obtained fraudulently by the person transferring them, they may be canceled at any time, and you may not receive a refund.
+              </p>
+              <p style="margin:0;font-size:12px;line-height:1.45;color:#6B6B6B;">
+                This email is <strong style="color:#2A2A2A;">NOT</strong> your ticket.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Transfer status -->
+          <tr>
+            <td style="padding:8px 20px 22px;text-align:center;">
+              <p style="margin:0;font-size:14px;color:#2A2A2A;">
+                Transfer Status:
+                <a href="{{ accept_url }}" style="color:#026CDF;text-decoration:underline;font-weight:600;">Pending</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer blurb -->
+          <tr>
+            <td style="padding:0 20px 32px;text-align:center;">
+              <p style="margin:0;font-size:14px;line-height:1.45;color:#2A2A2A;">
+                You got {{ ticket_count }} ticket(s)! You're one step closer to seeing {{ event_title }}.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
